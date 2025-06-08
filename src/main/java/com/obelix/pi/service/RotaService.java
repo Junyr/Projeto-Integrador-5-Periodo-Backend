@@ -1,6 +1,5 @@
 package com.obelix.pi.service;
 
-import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -13,29 +12,6 @@ public class RotaService implements IRotaService {
 
     @Override
     public Rota gerarRota(Bairro origem, Bairro destino) {
-        // TODO: implementar
-        return null;
-    }
-
-    @Override
-    public Rota buscarRota(Bairro origem, Bairro destino) {
-        // TODO: implementar
-        return null;
-    }
-
-    @Override
-    public void associarCaminhaoRota(Long caminhaoId, Rota rotaOtimizada) {
-        // TODO: implementar
-    }
-
-    @Override
-    public boolean salvarRota(Rota rota) {
-        // TODO: implementar
-        return false;
-    }
-
-    @Override
-    public List<Rota> listarRota() {
         // TODO: implementar
         return null;
     }

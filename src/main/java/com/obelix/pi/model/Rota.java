@@ -3,10 +3,11 @@ package com.obelix.pi.model;
 import java.util.List;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -21,16 +22,32 @@ public class Rota {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
+    @JoinColumn(name = "camihao_id")
     private Caminhao caminhao;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany
+    @JoinTable(
+        name = "rota_bairros",
+        joinColumns = @JoinColumn(name = "rota_id"),
+        inverseJoinColumns = @JoinColumn(name = "bairro_id")
+    )
     private List<Bairro> bairros;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany
+    @JoinTable(
+        name = "rota_ruas",
+        joinColumns = @JoinColumn(name = "rota_id"),
+        inverseJoinColumns = @JoinColumn(name = "rua_id")
+    )
     private List<Rua> ruas;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany
+    @JoinTable(
+        name = "rota_residuos_atendidos",
+        joinColumns = @JoinColumn(name = "rota_id"),
+        inverseJoinColumns = @JoinColumn(name = "tipo_residuos_id")
+    )
     private List<Residuo> residuosAtendidos;
 
     private double distanciaTotal;

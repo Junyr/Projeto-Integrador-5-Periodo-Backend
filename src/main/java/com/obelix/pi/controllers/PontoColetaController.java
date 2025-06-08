@@ -3,8 +3,6 @@ package com.obelix.pi.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,9 +22,23 @@ public class PontoColetaController {
     @Autowired
     PontoColetaRepo repo;
 
+    @GetMapping("/buscar/{id}")
+    public PontoColeta buscarPontoColeta(@PathVariable Long id) {
+        if (repo.existsById(id)) {
+            return repo.getReferenceById(id);
+        } else {
+            throw new RuntimeException("Caminhao não encontrado");
+        }
+    }
+
     @GetMapping("/listar")
     public List<PontoColeta> listar() {
         return repo.findAll();
+    }
+
+    @GetMapping("/listarPorTipoResiduo/{tipoResiduoId}")
+    public List<PontoColeta> listarPorTipoResiduo(@PathVariable Long tipoResiduoId) {
+        return repo.findByTipoResiduoId(tipoResiduoId);
     }
 
     @PostMapping("/adicionar")
@@ -48,7 +60,7 @@ public class PontoColetaController {
             atualizarPontoColeta.setTiposResiduos(PontoColeta.getTiposResiduos());
             repo.save(atualizarPontoColeta);
         } else {
-            throw new RuntimeException("Residuo não encontrado");
+            throw new RuntimeException("Ponto de coleta não encontrado");
         }
     }
 

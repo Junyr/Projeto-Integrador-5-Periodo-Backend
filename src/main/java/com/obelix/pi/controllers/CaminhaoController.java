@@ -1,9 +1,10 @@
 package com.obelix.pi.controllers;
 
+import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,43 +15,70 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.obelix.pi.model.Caminhao;
-import com.obelix.pi.service.interfaces.ICaminhaoService;
+import com.obelix.pi.repository.CaminhaoRepo;
+import com.obelix.pi.service.CaminhaoService;
 
 @RestController
-@RequestMapping("/api/caminhoes")
+@RequestMapping("/caminhao")
 public class CaminhaoController {
 
-    private final ICaminhaoService caminhaoService;
+    @Autowired
+    CaminhaoService service;
 
-    public CaminhaoController(ICaminhaoService caminhaoService) {
-        this.caminhaoService = caminhaoService;
+    @Autowired
+    CaminhaoRepo repo;
+
+    @GetMapping("/buscar/{id}")
+    public Caminhao buscarCaminhao(@PathVariable Long id) {
+        if (repo.existsById(id)) {
+            return repo.getReferenceById(id);
+        } else {
+            throw new RuntimeException("Caminhao não encontrado");
+        }
     }
 
-    @PostMapping
-    public ResponseEntity<Void> cadastrar(@RequestBody Caminhao caminhao) {
-        caminhaoService.cadastrarCaminhao(caminhao);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    @GetMapping("/listar")
+    public List<Caminhao> listar() {
+        return repo.findAll();
     }
 
-    @GetMapping
-    public ResponseEntity<List<Caminhao>> listar() {
-        return ResponseEntity.ok(caminhaoService.listarCaminhao());
+    @GetMapping("/listar_por_residuo/{tipoResiduoId}")
+    public List<Caminhao> listarPorTipoResiduo(@PathVariable Long tipoResiduoId) {
+        return repo.findByTipoResiduoId(tipoResiduoId);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Caminhao> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(caminhaoService.buscarCaminhao(id, null)); // ajuste conforme parâmetro correto
+    @PostMapping("/adicionar")
+    public void cadastrar(@RequestBody Caminhao caminhao) {
+        repo.save(caminhao);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Void> atualizar(@PathVariable Long id, @RequestBody Caminhao caminhao) {
-        caminhaoService.atualizarCaminhao(id, caminhao);
-        return ResponseEntity.noContent().build();
+    @PutMapping("/atualizar/{id}")
+    public void atualizar(@PathVariable Long id, @RequestBody Caminhao caminhao) {
+        if (repo.existsById(id)) {
+            Caminhao atualizarCaminhao = repo.getReferenceById(id);
+            atualizarCaminhao.setPlaca(caminhao.getPlaca());
+            atualizarCaminhao.setMotorista(caminhao.getMotorista());
+            atualizarCaminhao.setCapacidade(caminhao.getCapacidade());
+            atualizarCaminhao.setTiposResiduos(caminhao.getTiposResiduos());
+            repo.save(atualizarCaminhao);
+        } else {
+            throw new RuntimeException("Caminhao não encontrado");
+        }
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        caminhaoService.deletarCaminhao(id);
-        return ResponseEntity.noContent().build();
+    @DeleteMapping("/deletar/{id}")
+    public void deletar(@PathVariable Long id) {
+        repo.deleteById(id);;
     }
+
+    @GetMapping("/disponibilidade/{id}/{data}")
+    public boolean disponibilidade(@PathVariable("id") Long caminhaoId, @PathVariable("data") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate data) {
+        return service.verificarDisponibilidade(caminhaoId, data);
+    }
+    
+    @GetMapping("/compatibilidade_residuos/{caminhaoId}/{rotaId}")
+    public boolean compatibilidadeComResiduos(@PathVariable("caminhaoId") Long caminhaoId, @PathVariable("rotaId") Long rotaId) {
+        return service.validarCompatibilidadeComResiduos(caminhaoId, rotaId);
+    }
+
 }
