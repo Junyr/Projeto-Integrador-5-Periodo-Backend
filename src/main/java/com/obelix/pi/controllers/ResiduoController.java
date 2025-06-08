@@ -12,36 +12,34 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.obelix.pi.model.Rua;
-import com.obelix.pi.repository.RuaRepo;
+import com.obelix.pi.model.Residuo;
+import com.obelix.pi.repository.ResiduoRepo;
 
 @RestController
-@RequestMapping("/ruas")
-public class RuaController {
+@RequestMapping("/residuo")
+public class ResiduoController {
 
     @Autowired
-    RuaRepo repo;
+    ResiduoRepo repo;
 
     @GetMapping("/listar")
-    public List<Rua> listar() {
+    public List<Residuo> listar() {
         return repo.findAll();
     }
 
     @PostMapping("/adicionar")
-    public void cadastrar(@RequestBody Rua rua) {
-        repo.save(rua);
+    public void cadastrar(@RequestBody Residuo residuo) {
+        repo.save(residuo);
     }
 
     @PutMapping("/atualizar/{id}")
-    public void atualizar(@PathVariable Long id, @RequestBody Rua rua) {
+    public void atualizar(@PathVariable Long id, @RequestBody Residuo residuo) {
         if (repo.existsById(id)) {
-            Rua atualizarRua = repo.getReferenceById(id);
-            atualizarRua.setOrigem(rua.getOrigem());
-            atualizarRua.setDestino(rua.getDestino());
-            atualizarRua.setDistanciaKm(rua.getDistanciaKm());
-            repo.save(atualizarRua);
+            Residuo atualizarResiduo = repo.getReferenceById(id);
+            atualizarResiduo.setTipo(residuo.getTipo());
+            repo.save(atualizarResiduo);
         } else {
-            throw new RuntimeException("Rua não encontrada");
+            throw new RuntimeException("Residuo não encontrado");
         }
     }
 
@@ -50,4 +48,3 @@ public class RuaController {
         repo.deleteById(id);;
     }
 }
-

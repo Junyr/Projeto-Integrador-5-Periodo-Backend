@@ -4,8 +4,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
 
+@Data
 @Entity
+@Table(name = "residuo")
 public class Residuo {
     
     @Id
@@ -13,21 +17,5 @@ public class Residuo {
     private Long id;
 
     private String tipo;
-
-    public Residuo() {
-    }
-
-    public Residuo(Long id, String tipo) {
-        this.id = id;
-        this.tipo = tipo;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getTipo() {
-        return tipo;
-    }
 
 }

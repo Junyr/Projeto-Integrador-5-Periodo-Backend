@@ -9,8 +9,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Data;
 
+@Data
 @Entity
+@Table(name = "rota")
 public class Rota {
     
     @Id
@@ -30,42 +34,4 @@ public class Rota {
     private List<Residuo> residuosAtendidos;
 
     private double distanciaTotal;
-
-    public Rota() {
-    }
-
-    public Rota(Long id, Caminhao caminhao, List<Bairro> bairros, List<Rua> ruas, List<Residuo> residuosAtendidos, double distanciaTotal) {
-        this.id = id;
-        this.caminhao = caminhao;
-        this.bairros = bairros;
-        this.ruas = ruas;
-        this.residuosAtendidos = residuosAtendidos;
-        this.distanciaTotal = distanciaTotal;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Caminhao getCaminhao() {
-        return caminhao;
-    }
-
-    public List<Bairro> getBairros() {
-        return bairros;
-    }
-
-    public List<Rua> getRuas() {
-        return ruas;
-    }
-
-    public List<Residuo> getResiduosAtendidos() {
-        return residuosAtendidos;
-    }
-
-    public double getDistanciaTotal() {
-        return distanciaTotal;
-    }
-    
-
 }

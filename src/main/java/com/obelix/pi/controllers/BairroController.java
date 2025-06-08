@@ -1,8 +1,10 @@
 package com.obelix.pi.controllers;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -11,34 +13,39 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.obelix.pi.model.Bairro;
-import com.obelix.pi.service.interfaces.IBairroService;
+import com.obelix.pi.repository.BairroRepo;
 
 @RestController
-@RequestMapping("/api/bairros")
+@RequestMapping("/bairros")
 public class BairroController {
 
-    private final IBairroService bairroService;
+    @Autowired
+    BairroRepo repo;
 
-    public BairroController(IBairroService bairroService) {
-        this.bairroService = bairroService;
+    @GetMapping("/listar")
+    public List<Bairro> listar() {
+        return repo.findAll();
     }
 
-    @PostMapping
-    public ResponseEntity<Void> cadastrar(@RequestBody Bairro bairro) {
-        bairroService.cadastrarBairro(bairro);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    @PostMapping("/adicionar")
+    public void cadastrar(@RequestBody Bairro bairro) {
+        repo.save(bairro);
     }
 
-    @PutMapping
-    public ResponseEntity<Void> atualizar(@RequestBody Bairro bairro) {
-        bairroService.atualizarBairro(bairro);
-        return ResponseEntity.noContent().build();
+    @PutMapping("/atualizar/{id}")
+    public void atualizar(@PathVariable Long id, @RequestBody Bairro bairro) {
+        if (repo.existsById(id)) {
+            Bairro atualizarBairro = repo.getReferenceById(id);
+            atualizarBairro.setNome(bairro.getNome());
+            repo.save(atualizarBairro);
+        } else {
+            throw new RuntimeException("Bairro não encontrado");
+        }
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        bairroService.deletarBairro(id);
-        return ResponseEntity.noContent().build();
+    @DeleteMapping("/deletar/{id}")
+    public void deletar(@PathVariable Long id) {
+        repo.deleteById(id);;
     }
 }
 

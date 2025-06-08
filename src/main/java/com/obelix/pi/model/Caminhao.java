@@ -5,10 +5,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.Data;
 import jakarta.persistence.FetchType;
 import java.util.List;
 
+@Data
 @Entity
+@Table(name = "caminhao")
 public class Caminhao {
 
     @Id
@@ -21,36 +25,5 @@ public class Caminhao {
 
     @OneToMany(fetch = FetchType.LAZY)
     private List<Residuo> tiposResiduos;
-
-    public Caminhao() {
-    }
-
-    public Caminhao(Long id, String placa, String motorista, double capacidade, List<Residuo> tiposResiduos) {
-        this.id = id;
-        this.placa = placa;
-        this.motorista = motorista;
-        this.capacidade = capacidade;
-        this.tiposResiduos = tiposResiduos;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getPlaca() {
-        return placa;
-    }
-
-    public String getMotorista() {
-        return motorista;
-    }
-
-    public double getCapacidade() {
-        return capacidade;
-    }
-
-    public List<Residuo> getTiposResiduos() {
-        return tiposResiduos;
-    }
 }
 

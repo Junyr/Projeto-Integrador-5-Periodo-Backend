@@ -5,10 +5,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Data;
 import jakarta.persistence.FetchType;
 import java.time.LocalDate;
 
+@Data
 @Entity
+@Table(name = "itinerario")
 public class Itinerario {
 
     @Id
@@ -19,26 +23,5 @@ public class Itinerario {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Rota rota;
-
-    public Itinerario() {
-    }
-
-    public Itinerario(Long id, LocalDate data, Rota rota) {
-        this.id = id;
-        this.data = data;
-        this.rota = rota;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public LocalDate getData() {
-        return data;
-    }
-
-    public Rota getRota() {
-        return rota;
-    }
 }
 

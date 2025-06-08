@@ -2,6 +2,7 @@ package com.obelix.pi.controllers;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,39 +15,46 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.obelix.pi.model.PontoColeta;
-import com.obelix.pi.service.interfaces.IPontoColetaService;
+import com.obelix.pi.repository.PontoColetaRepo;
 
 @RestController
-@RequestMapping("/api/pontos")
+@RequestMapping("/ponto_coleta")
 public class PontoColetaController {
 
-    private final IPontoColetaService pontoService;
+    @Autowired
+    PontoColetaRepo repo;
 
-    public PontoColetaController(IPontoColetaService pontoService) {
-        this.pontoService = pontoService;
+    @GetMapping("/listar")
+    public List<PontoColeta> listar() {
+        return repo.findAll();
     }
 
-    @PostMapping
-    public ResponseEntity<Void> cadastrar(@RequestBody PontoColeta ponto) {
-        pontoService.cadastrarPontoColeta(ponto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    @PostMapping("/adicionar")
+    public void cadastrar(@RequestBody PontoColeta pontoColeta) {
+        repo.save(pontoColeta);
     }
 
-    @GetMapping
-    public ResponseEntity<List<PontoColeta>> listar() {
-        return ResponseEntity.ok(pontoService.listarPontoColeta());
+    @PutMapping("/atualizar/{id}")
+    public void atualizar(@PathVariable Long id, @RequestBody PontoColeta PontoColeta) {
+        if (repo.existsById(id)) {
+            PontoColeta atualizarPontoColeta = repo.getReferenceById(id);
+            atualizarPontoColeta.setNome(PontoColeta.getNome());
+            atualizarPontoColeta.setResponsavel(PontoColeta.getResponsavel());
+            atualizarPontoColeta.setTelefoneResponsavel(PontoColeta.getTelefoneResponsavel());
+            atualizarPontoColeta.setEmailResponsavel(PontoColeta.getEmailResponsavel());
+            atualizarPontoColeta.setEndereco(PontoColeta.getEndereco());
+            atualizarPontoColeta.setBairro(PontoColeta.getBairro());
+            atualizarPontoColeta.setHorario(PontoColeta.getHorario());
+            atualizarPontoColeta.setTiposResiduos(PontoColeta.getTiposResiduos());
+            repo.save(atualizarPontoColeta);
+        } else {
+            throw new RuntimeException("Residuo não encontrado");
+        }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Void> atualizar(@PathVariable Long id, @RequestBody PontoColeta ponto) {
-        pontoService.atualizarPontoColeta(id, ponto);
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        pontoService.deletarPontoColeta(id);
-        return ResponseEntity.noContent().build();
+    @DeleteMapping("/deletar/{id}")
+    public void deletar(@PathVariable Long id) {
+        repo.deleteById(id);;
     }
 }
 
