@@ -43,12 +43,8 @@ public class Rota {
     private List<Rua> ruas;
 
     @ManyToMany
-    @JoinTable(
-        name = "rota_residuos_atendidos",
-        joinColumns = @JoinColumn(name = "rota_id"),
-        inverseJoinColumns = @JoinColumn(name = "tipo_residuos_id")
-    )
-    private List<Residuo> residuosAtendidos;
+    @JoinColumn(name = "tipo_residuo_id")
+    private Residuo tipoResiduo;
 
     private double distanciaTotal;
 }

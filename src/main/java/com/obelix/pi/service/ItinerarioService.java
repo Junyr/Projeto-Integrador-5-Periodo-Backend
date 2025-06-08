@@ -14,7 +14,7 @@ public class ItinerarioService implements IItinerarioService {
 
     @Override
     public void associarRotaDiaEspecifico(Rota rota, Date dia) {
-        // TODO: implementar
+        
     }
 
     @Override

@@ -71,14 +71,4 @@ public class CaminhaoController {
         repo.deleteById(id);;
     }
 
-    @GetMapping("/disponibilidade/{id}/{data}")
-    public boolean disponibilidade(@PathVariable("id") Long caminhaoId, @PathVariable("data") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate data) {
-        return service.verificarDisponibilidade(caminhaoId, data);
-    }
-    
-    @GetMapping("/compatibilidade_residuos/{caminhaoId}/{rotaId}")
-    public boolean compatibilidadeComResiduos(@PathVariable("caminhaoId") Long caminhaoId, @PathVariable("rotaId") Long rotaId) {
-        return service.validarCompatibilidadeComResiduos(caminhaoId, rotaId);
-    }
-
 }

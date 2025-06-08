@@ -7,4 +7,5 @@ import com.obelix.pi.model.Rua;
 
 @RepositoryRestResource
 public interface RuaRepo extends JpaRepository<Rua, Long> {
+    Rua findByBairroOrigemAndBairroDestino(Long bairroOrigemId, Long bairroDestinoId);
 }
