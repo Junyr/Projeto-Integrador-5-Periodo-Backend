@@ -12,12 +12,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.obelix.pi.model.Rota;
 import com.obelix.pi.model.Rua;
 import com.obelix.pi.repository.RuaRepo;
+import com.obelix.pi.service.RotaService;
 
 @RestController
 @RequestMapping("/ruas")
 public class RuaController {
+
+    @Autowired
+    RotaService service;
 
     @Autowired
     RuaRepo repo;
@@ -30,6 +35,7 @@ public class RuaController {
     @PostMapping("/adicionar")
     public void cadastrar(@RequestBody Rua rua) {
         repo.save(rua);
+        service.atualizarRotas();
     }
 
     @PutMapping("/atualizar/{id}")
@@ -40,6 +46,7 @@ public class RuaController {
             atualizarRua.setDestino(rua.getDestino());
             atualizarRua.setDistanciaKm(rua.getDistanciaKm());
             repo.save(atualizarRua);
+            service.atualizarRotas();
         } else {
             throw new RuntimeException("Rua não encontrada");
         }
@@ -47,7 +54,8 @@ public class RuaController {
 
     @DeleteMapping("/deletar/{id}")
     public void deletar(@PathVariable Long id) {
-        repo.deleteById(id);;
+        repo.deleteById(id);
+        service.atualizarRotas();
     }
 }
 

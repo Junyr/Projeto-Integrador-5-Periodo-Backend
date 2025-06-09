@@ -6,12 +6,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.obelix.pi.model.PontoColeta;
 import com.obelix.pi.model.Residuo;
 import com.obelix.pi.repository.CaminhaoRepo;
 import com.obelix.pi.repository.ItinerarioRepo;
 import com.obelix.pi.repository.PontoColetaRepo;
-import com.obelix.pi.repository.RotaRepo;
 import com.obelix.pi.service.interfaces.ICaminhaoService;
 
 @Service

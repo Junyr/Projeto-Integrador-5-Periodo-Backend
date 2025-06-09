@@ -64,8 +64,19 @@ public class RotaService implements IRotaService {
     }
 
     @Override
-    public boolean atualizarRota(Rota rota) {
-        // TODO: implementar
-        return false;
+    public void atualizarRotas() {
+        List<Rota> rotas = rotaRepo.findAll();
+        for (Rota rota : rotas) {
+            Long caminhaoId = rota.getCaminhao().getId();
+            Long pontoColetaOrigemId = rota.getRuas().get(0).getOrigem().getId();
+            Long pontoColetaDestinoId = rota.getRuas().get(rota.getRuas().size() - 1).getDestino().getId();
+            Residuo tipoResiduo = rota.getTipoResiduo();
+
+            Rota rotaOtimizada = gerarRota(caminhaoId, pontoColetaOrigemId, pontoColetaDestinoId, tipoResiduo);
+            rota.setBairros(rotaOtimizada.getBairros());
+            rota.setRuas(rotaOtimizada.getRuas());
+            rota.setDistanciaTotal(rotaOtimizada.getDistanciaTotal());
+            rotaRepo.save(rota);
+        }
     }
 }
