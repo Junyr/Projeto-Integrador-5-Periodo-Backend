@@ -27,7 +27,7 @@ public class CaminhaoService implements ICaminhaoService {
     @Override
     public boolean verificarDisponibilidade(Long caminhaoId, LocalDate data) {
         if(caminhaoRepo.existsById(caminhaoId))
-            return !itinerarioRepo.existsByDataAndRota_Caminhao_Id(data, caminhaoId);
+            return itinerarioRepo.existsByDataAndRota_Caminhao_Id(data, caminhaoId);
         return false;
     }
 
@@ -36,7 +36,7 @@ public class CaminhaoService implements ICaminhaoService {
         if(caminhaoRepo.existsById(caminhaoId) && pontoColetaRepo.existsById(pontoColetaId)){
             List<Residuo> caminhaoResiduos = caminhaoRepo.getReferenceById(caminhaoId).getTiposResiduos();
             List<Residuo> pontoColetaResiduos = pontoColetaRepo.getReferenceById(pontoColetaId).getTiposResiduos();
-            return pontoColetaResiduos.stream().anyMatch(caminhaoResiduos::contains);
+            return caminhaoResiduos.stream().anyMatch(pontoColetaResiduos::contains);
         }
         return false;
     }

@@ -7,4 +7,6 @@ import com.obelix.pi.model.Residuo;
 
 @RepositoryRestResource
 public interface ResiduoRepo extends JpaRepository<Residuo, Long> {
+    Residuo findByTipo(String tipo);
+    boolean existsByTipo(String tipo);
 }

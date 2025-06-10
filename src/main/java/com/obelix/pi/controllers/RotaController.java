@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.obelix.pi.model.Residuo;
+import com.obelix.pi.controllers.DTO.RotaRequestDTO;
 import com.obelix.pi.model.Rota;
 import com.obelix.pi.repository.RotaRepo;
 import com.obelix.pi.service.RotaService;
@@ -33,17 +33,15 @@ public class RotaController {
     }
 
     @PostMapping("/adicionar")
-    public void cadastrar(@RequestBody Long pontoColetaOrigemId, @RequestBody Long pontoColetaDestinoId,
-    @RequestBody Residuo tipoResiduo, @RequestBody Long caminhaoId) {
-        Rota rota = service.gerarRota(caminhaoId, pontoColetaOrigemId, pontoColetaDestinoId, tipoResiduo); 
+    public void cadastrar(@RequestBody RotaRequestDTO requestDTO) {
+        Rota rota = service.gerarRota(requestDTO); 
         repo.save(rota);
     }
 
     @PutMapping("/atualizar/{id}")
-    public void atualizar(@PathVariable Long rotaId, @RequestBody Long pontoColetaOrigemId, @RequestBody Long pontoColetaDestinoId,
-    @RequestBody Residuo tipoResiduo, @RequestBody Long caminhaoId) {
+    public void atualizar(@PathVariable Long rotaId, @RequestBody RotaRequestDTO requestDTO) {
         if (repo.existsById(rotaId)) {
-            Rota rotaOtimizada = service.gerarRota(caminhaoId, pontoColetaOrigemId, pontoColetaDestinoId, tipoResiduo);
+            Rota rotaOtimizada = service.gerarRota(requestDTO);
             Rota atualizarRota = repo.getReferenceById(rotaId);
             atualizarRota.setCaminhao(rotaOtimizada.getCaminhao());
             atualizarRota.setBairros(rotaOtimizada.getBairros());

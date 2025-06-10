@@ -72,7 +72,7 @@ public class DijkstraService {
             while (atualId != null && !atualId.equals(origemId)) {
                 Long predecessorId = predecessores.get(atualId);
                 if (predecessorId != null) {
-                    Rua rua = ruaRepo.findByBairroOrigemAndBairroDestino(predecessorId, atualId);
+                    Rua rua = ruaRepo.findByOrigemAndDestino(predecessorId, atualId);
                     caminho.add(0, rua); // Adicionar no início da lista
                 }
                 atualId = predecessorId;

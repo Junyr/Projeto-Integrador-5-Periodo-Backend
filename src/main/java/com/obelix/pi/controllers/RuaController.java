@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.obelix.pi.model.Rota;
 import com.obelix.pi.model.Rua;
 import com.obelix.pi.repository.RuaRepo;
 import com.obelix.pi.service.RotaService;

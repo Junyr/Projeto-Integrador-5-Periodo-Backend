@@ -38,7 +38,7 @@ public class PontoColetaController {
 
     @GetMapping("/listarPorTipoResiduo/{tipoResiduoId}")
     public List<PontoColeta> listarPorTipoResiduo(@PathVariable Long tipoResiduoId) {
-        return repo.findByTipoResiduoId(tipoResiduoId);
+        return repo.findByTiposResiduos(tipoResiduoId);
     }
 
     @PostMapping("/adicionar")

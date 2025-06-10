@@ -42,7 +42,7 @@ public class Rota {
     )
     private List<Rua> ruas;
 
-    @ManyToMany
+    @ManyToOne
     @JoinColumn(name = "tipo_residuo_id")
     private Residuo tipoResiduo;
 
