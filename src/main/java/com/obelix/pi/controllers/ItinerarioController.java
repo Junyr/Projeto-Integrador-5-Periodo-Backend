@@ -47,13 +47,15 @@ public class ItinerarioController {
     @PutMapping("/atualizar/{id}")
     public void atualizar(@PathVariable Long id, @RequestBody Itinerario itinerario) {
         if (repo.existsById(id)) {
-            Itinerario atualizarItinerario = repo.getReferenceById(id);
-            atualizarItinerario.setData(itinerario.getData());
-            atualizarItinerario.setRota(itinerario.getRota());
-            repo.save(atualizarItinerario);
-        } else {
-            throw new RuntimeException("Rota não encontrada");
-        }
+            if(rotaRepo.existsById(itinerario.getRota().getId())){
+                if(service.verificarDisponibilidade(itinerario.getRota().getCaminhao().getId(), itinerario.getData())) {
+                    Itinerario atualizarItinerario = repo.getReferenceById(id);
+                    atualizarItinerario.setData(itinerario.getData());
+                    atualizarItinerario.setRota(itinerario.getRota());
+                    repo.save(atualizarItinerario);
+                } else throw new RuntimeException("Caminhão não disponível para a data informada");
+            } else throw new RuntimeException("Rota não encontrada.");
+        } else throw new RuntimeException("Itinerário não encontrado.");
     }
 
     @DeleteMapping("/deletar/{id}")

@@ -22,11 +22,8 @@ public class Usuario {
     private String nome;
     private String email;
     private String senhaHash;
-    private String perfil;
 
-    @PrePersist
-    @PreUpdate
-    private void transformarSenhaEmHash() {
+    public void transformarSenhaEmHash() {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         this.senhaHash = encoder.encode(this.senhaHash);
     }
