@@ -12,11 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.obelix.pi.controllers.DTO.UsuarioRequestDTO;
-import com.obelix.pi.model.Rua;
+import com.obelix.pi.controllers.DTO.UsuarioDadosRequestDTO;
 import com.obelix.pi.model.Usuario;
 import com.obelix.pi.repository.UsuarioRepo;
-import com.obelix.pi.service.interfaces.IUsuarioService;
 
 @RestController
 @RequestMapping("/usuario")
@@ -46,13 +44,19 @@ public class UsuarioController {
     }
 
     @PutMapping("/atualizar/dados/{id}")
-    public void atualizar(@PathVariable Long id, @RequestBody UsuarioRequestDTO requestDTO) {
+    public void atualizar(@PathVariable Long id, @RequestBody UsuarioDadosRequestDTO requestDTO) {
         if (repo.existsById(id)) {
-            Usuario atualizarUsuario = repo.getReferenceById(id);
-            repo.save(atualizarUsuario);
-        } else {
-            throw new RuntimeException("Rua não encontrada");
-        }
+            if(requestDTO.getNome() == null || requestDTO.getEmail() == null || requestDTO.getNome().isEmpty() || requestDTO.getEmail().isEmpty()) {
+                if(requestDTO.getNome().matches("^[a-zA-Zà-úÀ-Úâ-ûÂ-ÛçÇ]+(\\s[a-zA-Zà-úÀ-Úâ-ûÂ-ÛçÇ]+)?$")) {
+                    if(requestDTO.getEmail().matches("^.+@(gmail\\.com|hotmail\\.com|outlook\\.(com|com\\.br))$")) {
+                        Usuario usuario = repo.getReferenceById(id);
+                        usuario.setNome(requestDTO.getNome());
+                        usuario.setEmail(requestDTO.getEmail());
+                        repo.save(usuario);
+                    } else throw new RuntimeException("Por favor, forneça um email válido.");
+                } else throw new RuntimeException("Forneça um nome válido, apenas letras e espaços são permitidos.");
+            } else throw new RuntimeException("Por favor preencha todos os campos obrigatórios: nome, email e senha.");
+        } else throw new RuntimeException("Usuario não encontrado.");
     }
 
     @PutMapping("/atualizar/senha/{id}")

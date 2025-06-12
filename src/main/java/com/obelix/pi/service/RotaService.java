@@ -17,8 +17,6 @@ import com.obelix.pi.repository.PontoColetaRepo;
 import com.obelix.pi.repository.RotaRepo;
 import com.obelix.pi.service.interfaces.IRotaService;
 
-import io.micrometer.core.ipc.http.HttpSender.Request;
-
 @Service
 public class RotaService implements IRotaService {
 
