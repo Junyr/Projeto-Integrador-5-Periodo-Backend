@@ -7,4 +7,6 @@ import com.obelix.pi.model.Usuario;
 
 @RepositoryRestResource
 public interface UsuarioRepo extends JpaRepository<Usuario, Long> {
+    boolean existsByEmail(String email);
+    Usuario getReferenceByEmail(String email);
 }

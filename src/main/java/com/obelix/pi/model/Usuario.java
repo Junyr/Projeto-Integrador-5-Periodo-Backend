@@ -19,11 +19,16 @@ public class Usuario {
 
     private String nome;
     private String email;
-    private String senhaHash;
+    private String senha;
 
     public void transformarSenhaEmHash() {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        this.senhaHash = encoder.encode(this.senhaHash);
+        this.senha = encoder.encode(this.senha);
+    }
+
+    public boolean validarSenha(String senhaPura, String senhaHashDoBanco) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        return encoder.matches(senhaPura, senhaHashDoBanco);
     }
 }
 
