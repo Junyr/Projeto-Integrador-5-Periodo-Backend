@@ -15,9 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.obelix.pi.controllers.DTO.PontoColetaRequestDTO;
 import com.obelix.pi.controllers.DTO.PontoColetaResponseDTO;
-import com.obelix.pi.model.Bairro;
 import com.obelix.pi.model.PontoColeta;
-import com.obelix.pi.model.Residuo;
 import com.obelix.pi.repository.BairroRepo;
 import com.obelix.pi.repository.PontoColetaRepo;
 import com.obelix.pi.repository.ResiduoRepo;

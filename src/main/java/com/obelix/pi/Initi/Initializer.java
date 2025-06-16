@@ -50,9 +50,9 @@ public class Initializer implements CommandLineRunner {
             System.out.println("Reiduo adicionado: " + metal.getTipo());
         }
 
-        if(!residuoRepo.existsByTipo("Plastico")){
+        if(!residuoRepo.existsByTipo("Plástico")){
             Residuo plastico = new Residuo();
-            plastico.setTipo("Plastico");
+            plastico.setTipo("Plástico");
             residuoRepo.save(plastico);
             System.out.println("Reiduo adicionado: " + plastico.getTipo());
         }
@@ -64,9 +64,9 @@ public class Initializer implements CommandLineRunner {
             System.out.println("Reiduo adicionado: " + papel.getTipo());
         }
 
-        if(!residuoRepo.existsByTipo("Organico")) {
+        if(!residuoRepo.existsByTipo("Orgânico")) {
             Residuo organico = new Residuo();
-            organico.setTipo("Organico");
+            organico.setTipo("Orgânico");
             residuoRepo.save(organico);
             System.out.println("Reiduo adicionado: " + organico.getTipo());
         }
@@ -81,7 +81,7 @@ public class Initializer implements CommandLineRunner {
         // 3. Se não existir, salvar
 
         // Exemplo de leitura:
-        try (CSVReader reader = new CSVReader(new FileReader("src/main/resources/data/bairros.csv"))) {
+        try (CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream("src/main/resources/data/bairros.csv"), "UTF-8"))) {
             String[] line;
             boolean isHeader = true;
             while ((line = reader.readNext()) != null) {
@@ -113,7 +113,7 @@ public class Initializer implements CommandLineRunner {
         // 3. Se não existir, salvar
 
         // Exemplo de leitura:
-        try (CSVReader reader = new CSVReader(new FileReader("src/main/resources/data/ruas_conexoes.csv"))) {
+        try (CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream("src/main/resources/data/ruas_conexoes.csv"), "UTF-8"))) {
             String[] line;
             boolean isHeader = true;
             while ((line = reader.readNext()) != null) {
@@ -153,7 +153,7 @@ public class Initializer implements CommandLineRunner {
         // 3. Se não existir, salvar
 
         // Exemplo de leitura:
-        try (CSVReader reader = new CSVReader(new FileReader("src/main/resources/data/pontos_coleta.csv"))) {
+        try (CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream("src/main/resources/data/pontos_coleta.csv"), "UTF-8"))) {
             String[] line;
             boolean isHeader = true;
             while ((line = reader.readNext()) != null) {

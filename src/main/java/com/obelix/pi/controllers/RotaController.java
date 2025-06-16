@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.obelix.pi.controllers.DTO.RotaRequestDTO;
 import com.obelix.pi.controllers.DTO.RotaResponseDTO;
-import com.obelix.pi.model.PontoColeta;
 import com.obelix.pi.model.Rota;
 import com.obelix.pi.repository.BairroRepo;
 import com.obelix.pi.repository.CaminhaoRepo;
