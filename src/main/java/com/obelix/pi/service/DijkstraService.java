@@ -72,8 +72,15 @@ public class DijkstraService {
             while (atualId != null && !atualId.equals(origemId)) {
                 Long predecessorId = predecessores.get(atualId);
                 if (predecessorId != null) {
-                    Rua rua = ruaRepo.findByOrigemAndDestino(predecessorId, atualId);
-                    caminho.add(0, rua); // Adicionar no início da lista
+                    List<Rua> ruasEntre = ruaRepo.findByOrigemAndDestino(predecessorId, atualId);
+                    if (ruasEntre != null && !ruasEntre.isEmpty()) {
+                        Rua menorRua = ruasEntre.stream()
+                            .min(Comparator.comparingDouble(Rua::getDistanciaKm))
+                            .orElse(null);
+                        if (menorRua != null) {
+                            caminho.add(0, menorRua);
+                        } // ou escolha a lógica desejada
+                    }// Adicionar no início da lista
                 }
                 atualId = predecessorId;
             }

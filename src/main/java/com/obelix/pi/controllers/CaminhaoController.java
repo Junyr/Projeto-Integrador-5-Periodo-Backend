@@ -2,6 +2,8 @@ package com.obelix.pi.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -46,13 +48,9 @@ public class CaminhaoController {
 
     @GetMapping("/listar")
     public List<CaminhaoResponseDTO> listar() {
-        List<Caminhao> listCaminhaos = repo.findAll();
-        List<CaminhaoResponseDTO> listResponse = new ArrayList<>();
-        for (Caminhao caminhao : listCaminhaos) {
-            CaminhaoResponseDTO response = new CaminhaoResponseDTO(caminhao);
-            listResponse.add(response);
-        }
-        return listResponse;
+        return repo.findAll().stream()
+            .map(CaminhaoResponseDTO::new)
+            .collect(Collectors.toList());
     }
 
     @GetMapping("/listar_por_residuo/{tipoResiduoId}")

@@ -1,6 +1,7 @@
 package com.obelix.pi.controllers;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.obelix.pi.controllers.DTO.ItinerarioResponseDTO;
 import com.obelix.pi.model.Itinerario;
+import com.obelix.pi.model.Rota;
 import com.obelix.pi.repository.ItinerarioRepo;
 import com.obelix.pi.repository.RotaRepo;
 import com.obelix.pi.service.CaminhaoService;
@@ -31,14 +34,20 @@ public class ItinerarioController {
     RotaRepo rotaRepo;
 
     @GetMapping("/listar")
-    public List<Itinerario> listar() {
-        return repo.findAll();
+    public List<ItinerarioResponseDTO> listar() {
+        return repo.findAll()
+            .stream()
+            .map(ItinerarioResponseDTO::new)
+            .collect(Collectors.toList());
     }
 
     @PostMapping("/adicionar")
     public void cadastrar(@RequestBody Itinerario itinerario) {
         if(rotaRepo.existsById(itinerario.getRota().getId())){
-            if(service.verificarDisponibilidade(itinerario.getRota().getCaminhao().getId(), itinerario.getData())) {
+            Rota rota = rotaRepo.findById(itinerario.getRota().getId())
+                .orElseThrow(() -> new RuntimeException("Rota não encontrada"));
+            if(!service.verificarDisponibilidade(rota.getCaminhao().getId(), itinerario.getData())) {
+                itinerario.setRota(rota); // <-- garanta que a rota está completa!
                 repo.save(itinerario);
             } else throw new RuntimeException("Caminhão não disponível para a data informada");
         } else throw new RuntimeException("Rota não encontrada");
@@ -48,10 +57,12 @@ public class ItinerarioController {
     public void atualizar(@PathVariable Long id, @RequestBody Itinerario itinerario) {
         if (repo.existsById(id)) {
             if(rotaRepo.existsById(itinerario.getRota().getId())){
-                if(service.verificarDisponibilidade(itinerario.getRota().getCaminhao().getId(), itinerario.getData())) {
+                Rota rota = rotaRepo.findById(itinerario.getRota().getId())
+                    .orElseThrow(() -> new RuntimeException("Rota não encontrada"));
+                if(!service.verificarDisponibilidade(rota.getCaminhao().getId(), itinerario.getData())) {
                     Itinerario atualizarItinerario = repo.getReferenceById(id);
                     atualizarItinerario.setData(itinerario.getData());
-                    atualizarItinerario.setRota(itinerario.getRota());
+                    atualizarItinerario.setRota(rota); // <-- use a rota completa!
                     repo.save(atualizarItinerario);
                 } else throw new RuntimeException("Caminhão não disponível para a data informada");
             } else throw new RuntimeException("Rota não encontrada.");

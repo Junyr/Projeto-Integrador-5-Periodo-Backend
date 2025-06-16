@@ -9,11 +9,14 @@ import java.util.List;
 
 import com.obelix.pi.controllers.DTO.RotaRequestDTO;
 import com.obelix.pi.model.Bairro;
+import com.obelix.pi.model.PontoColeta;
 import com.obelix.pi.model.Residuo;
 import com.obelix.pi.model.Rota;
 import com.obelix.pi.model.Rua;
+import com.obelix.pi.repository.BairroRepo;
 import com.obelix.pi.repository.CaminhaoRepo;
 import com.obelix.pi.repository.PontoColetaRepo;
+import com.obelix.pi.repository.ResiduoRepo;
 import com.obelix.pi.repository.RotaRepo;
 import com.obelix.pi.service.interfaces.IRotaService;
 
@@ -33,36 +36,33 @@ public class RotaService implements IRotaService {
     private PontoColetaRepo pontoColetaRepo;
 
     @Autowired
+    ResiduoRepo residuoRepo;
+
+    @Autowired
     private RotaRepo rotaRepo;
+
+    @Autowired
+    private BairroRepo bairroRepo;
 
     @Override
     public Rota gerarRota(RotaRequestDTO requestDTO) {
-        if(caminhaoRepo.existsById(requestDTO.getCaminhaoId())) {
-            if(pontoColetaRepo.existsById(requestDTO.getPontoColetaOrigemId())) {
-                if(pontoColetaRepo.existsById(requestDTO.getPontoColetaDestinoId())) {
-                    if(caminhaoService.validarCompatibilidadeComResiduos(requestDTO.getCaminhaoId(), requestDTO.getPontoColetaDestinoId()) &&
-                        caminhaoService.validarCompatibilidadeComResiduos(requestDTO.getCaminhaoId(), requestDTO.getPontoColetaOrigemId())) {
-                            Rota rota = new Rota();
-                            rota.setCaminhao(caminhaoRepo.getReferenceById(requestDTO.getCaminhaoId()));
+        if(caminhaoService.validarCompatibilidadeComResiduos(requestDTO.getCaminhaoId(), requestDTO.getDestinoId()) &&
+            caminhaoService.validarCompatibilidadeComResiduos(requestDTO.getCaminhaoId(), requestDTO.getOrigemId())) {
+                Rota rota = new Rota();
+                rota.setCaminhao(caminhaoRepo.getReferenceById(requestDTO.getCaminhaoId()));
 
-                            List<Rua> caminho = dijkstraService.encontrarCaminhoMaisCurto(requestDTO.getPontoColetaOrigemId(), requestDTO.getPontoColetaDestinoId());
-                            List<Bairro> bairroCaminho = new ArrayList<>();
-                            if(caminho != null){
-                                for(Rua rua : caminho) {
-                                    bairroCaminho.add(rua.getOrigem());
-                                    rota.setDistanciaTotal(rota.getDistanciaTotal() + rua.getDistanciaKm());
-                                }
-                            }
+                PontoColeta pontoColetaOrigem = pontoColetaRepo.getReferenceById(requestDTO.getOrigemId());
+                Bairro bairroPontoColetaOrigem = bairroRepo.getReferenceById(pontoColetaOrigem.getBairro().getId());
+                PontoColeta pontoColetaDestino = pontoColetaRepo.getReferenceById(requestDTO.getDestinoId());
+                Bairro bairroPontoColetaDestino = bairroRepo.getReferenceById(pontoColetaDestino.getBairro().getId());
 
-                            rota.setBairros(bairroCaminho);
-                            rota.setRuas(caminho);
-                            rota.setTipoResiduo(requestDTO.getTipoResiduo());
-                            rotaRepo.save(rota);
-                            return rota;
-                    } throw new RuntimeException("Erro ao gerar rota: Tipo de residuo não compativel.");
-                } throw new RuntimeException("Erro ao gerar rota: Ponto de Coleta de destino não existe.");
-           } throw new RuntimeException("Erro ao gerar rota: Ponto de Coleta de origem não existe.");
-        } throw new RuntimeException("Erro ao gerar rota: Caminhão não existe.");
+                List<Rua> caminho = dijkstraService.encontrarCaminhoMaisCurto(bairroPontoColetaOrigem.getId(), bairroPontoColetaDestino.getId());
+                List<Bairro> bairroCaminho = extrairBairrosDoCaminho(caminho, bairroPontoColetaOrigem.getId(), bairroPontoColetaDestino.getId(), bairroRepo);
+                rota.setBairros(bairroCaminho);
+                rota.setRuas(caminho);
+                rota.setTiposResiduos(residuoRepo.findAllById(requestDTO.getTipoResiduoId()));
+                return rota;
+        } throw new RuntimeException("Erro ao gerar rota: Tipo de residuo não compativel.");
     }
 
     @Override
@@ -72,13 +72,19 @@ public class RotaService implements IRotaService {
             Long caminhaoId = rota.getCaminhao().getId();
             Long pontoColetaOrigemId = rota.getRuas().get(0).getOrigem().getId();
             Long pontoColetaDestinoId = rota.getRuas().get(rota.getRuas().size() - 1).getDestino().getId();
-            Residuo tipoResiduo = rota.getTipoResiduo();
+            List<Residuo> tiposResiduos = rota.getTiposResiduos();
 
             RotaRequestDTO requestDTO = new RotaRequestDTO();
             requestDTO.setCaminhaoId(caminhaoId);
-            requestDTO.setPontoColetaOrigemId(pontoColetaOrigemId);
-            requestDTO.setPontoColetaDestinoId(pontoColetaDestinoId);
-            requestDTO.setTipoResiduo(tipoResiduo);
+            requestDTO.setOrigemId(pontoColetaOrigemId);
+            requestDTO.setDestinoId(pontoColetaDestinoId);
+
+            // Assuming setTipoResiduoId expects a list of IDs
+            List<Long> tipoResiduoIds = new ArrayList<>();
+            for (Residuo residuo : tiposResiduos) {
+                tipoResiduoIds.add(residuo.getId());
+            }
+            requestDTO.setTipoResiduoId(tipoResiduoIds);
 
             Rota rotaOtimizada = gerarRota(requestDTO);
             rota.setBairros(rotaOtimizada.getBairros());
@@ -86,5 +92,24 @@ public class RotaService implements IRotaService {
             rota.setDistanciaTotal(rotaOtimizada.getDistanciaTotal());
             rotaRepo.save(rota);
         }
+    }
+
+    public List<Bairro> extrairBairrosDoCaminho(List<Rua> caminho, Long origemId, Long destinoId, BairroRepo bairroRepo) {
+        List<Bairro> bairros = new ArrayList<>();
+        if (caminho == null || caminho.isEmpty()) {
+            // Caminho vazio, só origem e destino
+            bairros.add(bairroRepo.findById(origemId).orElse(null));
+            bairros.add(bairroRepo.findById(destinoId).orElse(null));
+            return bairros;
+        }
+        // Sempre começa pelo bairro de origem
+        Bairro atual = bairroRepo.findById(origemId).orElse(null);
+        if (atual != null) bairros.add(atual);
+
+        for (Rua rua : caminho) {
+            Bairro destinoRua = rua.getDestino();
+            if (destinoRua != null) bairros.add(destinoRua);
+        }
+        return bairros;
     }
 }

@@ -23,7 +23,7 @@ public class Rota {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "camihao_id")
+    @JoinColumn(name = "caminhao_id")
     private Caminhao caminhao;
 
     @ManyToMany
@@ -42,9 +42,13 @@ public class Rota {
     )
     private List<Rua> ruas;
 
-    @ManyToOne
-    @JoinColumn(name = "tipo_residuo_id")
-    private Residuo tipoResiduo;
+    @ManyToMany
+    @JoinTable(
+        name = "rota_tipos_residuos",
+        joinColumns = @JoinColumn(name = "rota_id"),
+        inverseJoinColumns = @JoinColumn(name = "tipo_residuo_id")
+    )
+    private List<Residuo> tiposResiduos;
 
     private double distanciaTotal;
 }
