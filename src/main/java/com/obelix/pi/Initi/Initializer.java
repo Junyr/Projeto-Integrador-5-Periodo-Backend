@@ -106,25 +106,17 @@ public class Initializer implements CommandLineRunner {
     }
 
     private void importarRuasCSV() throws CsvValidationException {
-        // Lógica para ler o CSV, validar e salvar no banco
-        // Exemplo:
-        // 1. Ler linhas do CSV
-        // 2. Para cada linha, verificar se já existe no banco
-        // 3. Se não existir, salvar
-
-        // Exemplo de leitura:
         try (CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream("src/main/resources/data/ruas_conexoes.csv"), "UTF-8"))) {
             String[] line;
             boolean isHeader = true;
             while ((line = reader.readNext()) != null) {
                 if (isHeader) {
-                    isHeader = false; // Ignora o cabeçalho
+                    isHeader = false;
                     continue;
                 }
                 Long ruaId = Long.parseLong(line[0]);
 
                 if(!ruaRepo.existsById(ruaId)) {
-                    // Cria e salva o novo bairro
                     Bairro bairroOrigem = bairroRepo.findById(Long.parseLong(line[1])).orElse(null);
                     Bairro bairroDestino = bairroRepo.findById(Long.parseLong(line[2])).orElse(null);
                     if (bairroOrigem == null || bairroDestino == null) {
@@ -146,19 +138,12 @@ public class Initializer implements CommandLineRunner {
     }
 
     private void importarPontoColetaCSV() throws CsvValidationException {
-        // Lógica para ler o CSV, validar e salvar no banco
-        // Exemplo:
-        // 1. Ler linhas do CSV
-        // 2. Para cada linha, verificar se já existe no banco
-        // 3. Se não existir, salvar
-
-        // Exemplo de leitura:
         try (CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream("src/main/resources/data/pontos_coleta.csv"), "UTF-8"))) {
             String[] line;
             boolean isHeader = true;
             while ((line = reader.readNext()) != null) {
                 if (isHeader) {
-                    isHeader = false; // Ignora o cabeçalho
+                    isHeader = false;
                     continue;
                 }
                 String nome = line[2];

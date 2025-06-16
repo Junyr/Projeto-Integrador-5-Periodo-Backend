@@ -79,7 +79,6 @@ public class RotaService implements IRotaService {
             requestDTO.setOrigemId(pontoColetaOrigemId);
             requestDTO.setDestinoId(pontoColetaDestinoId);
 
-            // Assuming setTipoResiduoId expects a list of IDs
             List<Long> tipoResiduoIds = new ArrayList<>();
             for (Residuo residuo : tiposResiduos) {
                 tipoResiduoIds.add(residuo.getId());
@@ -97,7 +96,6 @@ public class RotaService implements IRotaService {
     public List<Bairro> extrairBairrosDoCaminho(List<Rua> caminho, Long origemId, Long destinoId, BairroRepo bairroRepo) {
         List<Bairro> bairros = new ArrayList<>();
         if (caminho == null || caminho.isEmpty()) {
-            // Caminho vazio, só origem e destino
             bairros.add(bairroRepo.findById(origemId).orElse(null));
             bairros.add(bairroRepo.findById(destinoId).orElse(null));
             return bairros;

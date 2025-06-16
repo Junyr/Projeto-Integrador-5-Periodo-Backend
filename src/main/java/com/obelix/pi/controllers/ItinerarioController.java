@@ -47,7 +47,7 @@ public class ItinerarioController {
             Rota rota = rotaRepo.findById(itinerario.getRota().getId())
                 .orElseThrow(() -> new RuntimeException("Rota não encontrada"));
             if(!service.verificarDisponibilidade(rota.getCaminhao().getId(), itinerario.getData())) {
-                itinerario.setRota(rota); // <-- garanta que a rota está completa!
+                itinerario.setRota(rota);
                 repo.save(itinerario);
             } else throw new RuntimeException("Caminhão não disponível para a data informada");
         } else throw new RuntimeException("Rota não encontrada");
@@ -62,7 +62,7 @@ public class ItinerarioController {
                 if(!service.verificarDisponibilidade(rota.getCaminhao().getId(), itinerario.getData())) {
                     Itinerario atualizarItinerario = repo.getReferenceById(id);
                     atualizarItinerario.setData(itinerario.getData());
-                    atualizarItinerario.setRota(rota); // <-- use a rota completa!
+                    atualizarItinerario.setRota(rota);
                     repo.save(atualizarItinerario);
                 } else throw new RuntimeException("Caminhão não disponível para a data informada");
             } else throw new RuntimeException("Rota não encontrada.");
