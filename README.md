@@ -1,5 +1,6 @@
 ## ATIVIDADES BACKEND
 
+_**PRIORIDADE**_
 * **PADRÕES DE PROJETO**
     * Aplicar no minimo 5 padrões de projetos e documentar no código qual foi utilizado.
 
@@ -19,7 +20,7 @@
         - Técnica escolhida para implementação do sintático e a tabela correspondente.
 
 * **OUTROS**
-    * Criação de exceções com codigo de erro e mensagem personalizada.
+    * Implementar Exception Handler.
     * Integração do swagger.
         - Testes e validações com swagger.
     * Corrigir inconsistencias que perceberem.
