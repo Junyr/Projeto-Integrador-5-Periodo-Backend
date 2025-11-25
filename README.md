@@ -3,6 +3,8 @@
 _**PRIORIDADE**_
 * **PADRÕES DE PROJETO**
     * Aplicar no minimo 5 padrões de projetos e documentar no código qual foi utilizado.
+ 
+***
 
 * **CARMEM PT.1**
     * As validações terão uma tabela propria, onde tera o dado que esta sendo validado e o regex utilizado.
