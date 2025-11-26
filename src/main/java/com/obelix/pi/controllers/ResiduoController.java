@@ -29,6 +29,9 @@ public class ResiduoController {
 
     @PostMapping("/adicionar")
     public void cadastrar(@RequestBody Residuo residuo) {
+        if (residuo.getTipo() == null || residuo.getTipo().isEmpty()) {
+            throw new RuntimeException("Tipo de resíduo não pode ser vazio.");
+        }
         repo.save(residuo);
     }
 
@@ -39,12 +42,12 @@ public class ResiduoController {
             atualizarResiduo.setTipo(residuo.getTipo());
             repo.save(atualizarResiduo);
         } else {
-            throw new RuntimeException("Residuo não encontrado");
+            throw new RuntimeException("Resíduo não encontrado");
         }
     }
 
     @DeleteMapping("/deletar/{id}")
     public void deletar(@PathVariable Long id) {
-        repo.deleteById(id);;
+        repo.deleteById(id);
     }
 }

@@ -29,6 +29,9 @@ public class BairroController {
 
     @PostMapping("/adicionar")
     public void cadastrar(@RequestBody Bairro bairro) {
+        if (bairro.getNome() == null || bairro.getNome().isEmpty()) {
+            throw new RuntimeException("Nome do bairro não pode ser vazio.");
+        }
         repo.save(bairro);
     }
 
@@ -36,7 +39,11 @@ public class BairroController {
     public void atualizar(@PathVariable Long id, @RequestBody Bairro bairro) {
         if (repo.existsById(id)) {
             Bairro atualizarBairro = repo.getReferenceById(id);
-            atualizarBairro.setNome(bairro.getNome());
+            if (bairro.getNome() != null && !bairro.getNome().isEmpty()) {
+                atualizarBairro.setNome(bairro.getNome());
+            } else {
+                throw new RuntimeException("Nome do bairro não pode ser vazio.");
+            }
             repo.save(atualizarBairro);
         } else {
             throw new RuntimeException("Bairro não encontrado");
@@ -45,7 +52,6 @@ public class BairroController {
 
     @DeleteMapping("/deletar/{id}")
     public void deletar(@PathVariable Long id) {
-        repo.deleteById(id);;
+        repo.deleteById(id);
     }
 }
-

@@ -41,7 +41,7 @@ public class CaminhaoController {
             Caminhao caminhao = repo.getReferenceById(id);
             return new CaminhaoResponseDTO(caminhao);
         } else {
-            throw new RuntimeException("Caminhao não encontrado");
+            throw new RuntimeException("Caminhão não encontrado");
         }
     }
 
@@ -50,11 +50,6 @@ public class CaminhaoController {
         return repo.findAll().stream()
             .map(CaminhaoResponseDTO::new)
             .collect(Collectors.toList());
-    }
-
-    @GetMapping("/listar_por_residuo/{tipoResiduoId}")
-    public List<Caminhao> listarPorTipoResiduo(@PathVariable Long tipoResiduoId) {
-        return repo.findByTiposResiduos(tipoResiduoId);
     }
 
     @PostMapping("/adicionar")
@@ -89,13 +84,12 @@ public class CaminhaoController {
                 repo.save(atualizarCaminhao);
             }
         } else {
-            throw new RuntimeException("Caminhao não encontrado");
+            throw new RuntimeException("Caminhão não encontrado");
         }
     }
 
     @DeleteMapping("/deletar/{id}")
     public void deletar(@PathVariable Long id) {
-        repo.deleteById(id);;
+        repo.deleteById(id);
     }
-
 }

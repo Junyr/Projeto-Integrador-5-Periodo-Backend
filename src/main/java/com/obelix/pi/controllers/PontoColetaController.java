@@ -38,7 +38,7 @@ public class PontoColetaController {
         if (repo.existsById(id)) {
             return repo.getReferenceById(id);
         } else {
-            throw new RuntimeException("Caminhao não encontrado");
+            throw new RuntimeException("Ponto de coleta não encontrado");
         }
     }
 
@@ -47,11 +47,6 @@ public class PontoColetaController {
         return repo.findAll().stream()
             .map(PontoColetaResponseDTO::new)
             .collect(Collectors.toList());
-    }
-
-    @GetMapping("/listarPorTipoResiduo/{tipoResiduoId}")
-    public List<PontoColeta> listarPorTipoResiduo(@PathVariable Long tipoResiduoId) {
-        return repo.findByTiposResiduos(tipoResiduoId);
     }
 
     @PostMapping("/adicionar")
@@ -90,7 +85,6 @@ public class PontoColetaController {
 
     @DeleteMapping("/deletar/{id}")
     public void deletar(@PathVariable Long id) {
-        repo.deleteById(id);;
+        repo.deleteById(id);
     }
 }
-

@@ -71,7 +71,6 @@ public class ItinerarioController {
 
     @DeleteMapping("/deletar/{id}")
     public void deletar(@PathVariable Long id) {
-        repo.deleteById(id);;
+        repo.deleteById(id);
     }
 }
-
