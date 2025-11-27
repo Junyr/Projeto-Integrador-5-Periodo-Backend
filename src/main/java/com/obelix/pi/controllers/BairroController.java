@@ -3,14 +3,8 @@ package com.obelix.pi.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import com.obelix.pi.model.Bairro;
 import com.obelix.pi.repository.BairroRepo;
@@ -20,38 +14,43 @@ import com.obelix.pi.repository.BairroRepo;
 public class BairroController {
 
     @Autowired
-    BairroRepo repo;
+    private BairroRepo repo;
 
     @GetMapping("/listar")
-    public List<Bairro> listar() {
-        return repo.findAll();
+    public ResponseEntity<List<Bairro>> listar() {
+        return ResponseEntity.ok(repo.findAll());
+    }
+
+    @GetMapping("/buscar/{id}")
+    public ResponseEntity<Bairro> buscar(@PathVariable Long id) {
+        Bairro b = repo.findById(id).orElseThrow(() -> new RuntimeException("Bairro não encontrado"));
+        return ResponseEntity.ok(b);
     }
 
     @PostMapping("/adicionar")
-    public void cadastrar(@RequestBody Bairro bairro) {
-        if (bairro.getNome() == null || bairro.getNome().isEmpty()) {
+    public ResponseEntity<Bairro> cadastrar(@RequestBody Bairro bairro) {
+        if (bairro.getNome() == null || bairro.getNome().isBlank()) {
             throw new RuntimeException("Nome do bairro não pode ser vazio.");
         }
-        repo.save(bairro);
+        Bairro salvo = repo.save(bairro);
+        return ResponseEntity.status(201).body(salvo);
     }
 
     @PutMapping("/atualizar/{id}")
-    public void atualizar(@PathVariable Long id, @RequestBody Bairro bairro) {
-        if (repo.existsById(id)) {
-            Bairro atualizarBairro = repo.getReferenceById(id);
-            if (bairro.getNome() != null && !bairro.getNome().isEmpty()) {
-                atualizarBairro.setNome(bairro.getNome());
-            } else {
-                throw new RuntimeException("Nome do bairro não pode ser vazio.");
-            }
-            repo.save(atualizarBairro);
-        } else {
-            throw new RuntimeException("Bairro não encontrado");
+    public ResponseEntity<Bairro> atualizar(@PathVariable Long id, @RequestBody Bairro bairro) {
+        Bairro existente = repo.findById(id).orElseThrow(() -> new RuntimeException("Bairro não encontrado"));
+        if (bairro.getNome() == null || bairro.getNome().isBlank()) {
+            throw new RuntimeException("Nome do bairro não pode ser vazio.");
         }
+        existente.setNome(bairro.getNome());
+        repo.save(existente);
+        return ResponseEntity.ok(existente);
     }
 
     @DeleteMapping("/deletar/{id}")
-    public void deletar(@PathVariable Long id) {
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        if (!repo.existsById(id)) return ResponseEntity.notFound().build();
         repo.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

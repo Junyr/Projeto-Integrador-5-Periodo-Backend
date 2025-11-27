@@ -2,16 +2,6 @@ package com.obelix.pi.controllers;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.obelix.pi.controllers.DTO.RuaRequestDTO;
 import com.obelix.pi.model.Bairro;
 import com.obelix.pi.model.Rua;
@@ -19,59 +9,68 @@ import com.obelix.pi.repository.BairroRepo;
 import com.obelix.pi.repository.RuaRepo;
 import com.obelix.pi.service.RotaService;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+/**
+ * Controller de Ruas — mantém atualização de rotas após mudanças.
+ */
 @RestController
 @RequestMapping("/ruas")
 public class RuaController {
 
     @Autowired
-    RotaService service;
+    private RotaService service;
 
     @Autowired
-    BairroRepo bairroRepo;
+    private BairroRepo bairroRepo;
+
     @Autowired
-    RuaRepo repo;
+    private RuaRepo repo;
 
     @GetMapping("/listar")
-    public List<Rua> listar() {
-        return repo.findAll();
+    public ResponseEntity<List<Rua>> listar() {
+        return ResponseEntity.ok(repo.findAll());
     }
 
     @PostMapping("/adicionar")
-    public void cadastrar(@RequestBody RuaRequestDTO requestDTO) {
-        if(requestDTO.validarAtributos(bairroRepo)){
-            Bairro origem = bairroRepo.getReferenceById(requestDTO.getOrigemId());
-            Bairro destino = bairroRepo.getReferenceById(requestDTO.getDestinoId());
+    public ResponseEntity<Rua> cadastrar(@RequestBody RuaRequestDTO requestDTO) {
+        requestDTO.validarAtributos(bairroRepo);
+        Bairro origem = bairroRepo.findById(requestDTO.getOrigemId()).orElseThrow(() -> new RuntimeException("Bairro de origem não encontrado"));
+        Bairro destino = bairroRepo.findById(requestDTO.getDestinoId()).orElseThrow(() -> new RuntimeException("Bairro de destino não encontrado"));
 
-            Rua rua = new Rua();
-            rua.setOrigem(origem);
-            rua.setDestino(destino);
-            rua.setDistanciaKm(requestDTO.getDistanciaKm());
-            repo.save(rua);
-            service.atualizarRotas();
-        }
+        Rua rua = new Rua();
+        rua.setOrigem(origem);
+        rua.setDestino(destino);
+        rua.setDistanciaKm(requestDTO.getDistanciaKm());
+        repo.save(rua);
+        service.atualizarRotas();
+        return ResponseEntity.status(201).body(rua);
     }
 
     @PutMapping("/atualizar/{id}")
-    public void atualizar(@PathVariable Long id, @RequestBody RuaRequestDTO requestDTO) {
-        if (repo.existsById(id)) {
-            if(requestDTO.validarAtributos(bairroRepo)){
-                Bairro origem = bairroRepo.getReferenceById(requestDTO.getOrigemId());
-                Bairro destino = bairroRepo.getReferenceById(requestDTO.getDestinoId());
+    public ResponseEntity<Rua> atualizar(@PathVariable Long id, @RequestBody RuaRequestDTO requestDTO) {
+        if (!repo.existsById(id)) throw new RuntimeException("Rua não encontrada");
+        requestDTO.validarAtributos(bairroRepo);
 
-                Rua atualizarRua = repo.getReferenceById(id);
-                atualizarRua.setOrigem(origem);
-                atualizarRua.setDestino(destino);
-                atualizarRua.setDistanciaKm(requestDTO.getDistanciaKm());
-                repo.save(atualizarRua);
-                service.atualizarRotas();
-            }
-        } else throw new RuntimeException("Rua não encontrada");
+        Bairro origem = bairroRepo.findById(requestDTO.getOrigemId()).orElseThrow(() -> new RuntimeException("Bairro de origem não encontrado"));
+        Bairro destino = bairroRepo.findById(requestDTO.getDestinoId()).orElseThrow(() -> new RuntimeException("Bairro de destino não encontrado"));
+
+        Rua atualizarRua = repo.findById(id).orElseThrow(() -> new RuntimeException("Rua não encontrada"));
+        atualizarRua.setOrigem(origem);
+        atualizarRua.setDestino(destino);
+        atualizarRua.setDistanciaKm(requestDTO.getDistanciaKm());
+        repo.save(atualizarRua);
+        service.atualizarRotas();
+        return ResponseEntity.ok(atualizarRua);
     }
 
     @DeleteMapping("/deletar/{id}")
-    public void deletar(@PathVariable Long id) {
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        if (!repo.existsById(id)) return ResponseEntity.notFound().build();
         repo.deleteById(id);
         service.atualizarRotas();
+        return ResponseEntity.noContent().build();
     }
 }
-

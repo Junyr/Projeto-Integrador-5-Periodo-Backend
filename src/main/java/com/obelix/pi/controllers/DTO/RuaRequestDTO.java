@@ -2,28 +2,41 @@ package com.obelix.pi.controllers.DTO;
 
 import com.obelix.pi.repository.BairroRepo;
 
-import lombok.Data;
-
-@Data
+/**
+ * DTO para criação/atualização de Rua.
+ */
 public class RuaRequestDTO {
     private Long id;
     private Long origemId;
     private Long destinoId;
     private double distanciaKm;
 
-    public boolean validarAtributos(BairroRepo bairroRepo){
-        if(this.origemId == null || this.destinoId == null || this.distanciaKm == 0 ||
-         this.origemId == 0 || this.destinoId == 0) {
-            throw new RuntimeException("Por favor preencha todos os campos obrigatórios: Bairro de origem e destino, destino Km.");
+    // Getters/Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public Long getOrigemId() { return origemId; }
+    public void setOrigemId(Long origemId) { this.origemId = origemId; }
+
+    public Long getDestinoId() { return destinoId; }
+    public void setDestinoId(Long destinoId) { this.destinoId = destinoId; }
+
+    public double getDistanciaKm() { return distanciaKm; }
+    public void setDistanciaKm(double distanciaKm) { this.distanciaKm = distanciaKm; }
+
+    public boolean validarAtributos(BairroRepo bairroRepo) {
+        if (this.origemId == null || this.destinoId == null) {
+            throw new RuntimeException("Por favor preencha os ids de origem e destino.");
         }
-
-        if(bairroRepo.existsById(this.origemId)){
-            if(bairroRepo.existsById(this.destinoId)){
-                if(this.distanciaKm > 0){
-                    return true;
-                } else throw new RuntimeException("Infome um numero valido para a distancia!");
-            } else throw new RuntimeException("Bairro de destino não existe!");
-        } else throw new RuntimeException("Bairro de origem não existe!");
+        if (this.distanciaKm <= 0) {
+            throw new RuntimeException("Informe um número válido para a distância (maior que zero).");
+        }
+        if (!bairroRepo.existsById(this.origemId)) {
+            throw new RuntimeException("Bairro de origem não existe!");
+        }
+        if (!bairroRepo.existsById(this.destinoId)) {
+            throw new RuntimeException("Bairro de destino não existe!");
+        }
+        return true;
     }
-
 }
