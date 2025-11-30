@@ -73,8 +73,10 @@ public class RotaService implements IRotaService {
         throw new RuntimeException("Erro ao gerar rota: Tipo de resíduo não compatível com o caminhão.");
     }
 
+    
     @Override
     public void atualizarRotas() {
+        /*
         List<Rota> rotas = rotaRepo.findAll();
 
         for (Rota rota : rotas) {
@@ -93,7 +95,7 @@ public class RotaService implements IRotaService {
             rota.setDistanciaTotal(rotaOtimizada.getDistanciaTotal());
 
             rotaRepo.save(rota);
-        }
+        }*/
     }
 
     private List<Bairro> extrairBairrosDoCaminho(List<Rua> caminho, Long origemId, Long destinoId) {
