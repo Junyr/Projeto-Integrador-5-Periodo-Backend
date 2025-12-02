@@ -4,31 +4,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.obelix.pi.controllers.DTO.CaminhaoRequestDTO;
 import com.obelix.pi.controllers.DTO.CaminhaoResponseDTO;
 import com.obelix.pi.model.Caminhao;
 import com.obelix.pi.model.Residuo;
 import com.obelix.pi.repository.CaminhaoRepo;
 import com.obelix.pi.repository.ResiduoRepo;
+import com.obelix.pi.service.CaminhaoService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 /**
- * Controller de caminhões — corrige riscos de NPE e usa findById em vez de getReference direto.
+ * Controller de caminhões (sem Lombok).
  */
 @RestController
 @RequestMapping("/caminhao")
 public class CaminhaoController {
+
+    @Autowired
+    private CaminhaoService service;
 
     @Autowired
     private ResiduoRepo residuoRepo;
@@ -52,10 +48,8 @@ public class CaminhaoController {
 
     @PostMapping("/adicionar")
     public ResponseEntity<CaminhaoResponseDTO> cadastrar(@RequestBody CaminhaoRequestDTO requestDTO) {
-        // valida atributos com o método existente
         requestDTO.validarAtributos();
 
-        // converte ids de resíduos em entidades (verifica existência)
         List<Residuo> listaResiduo = new ArrayList<>();
         for (Long residuoId : requestDTO.getTiposResiduos()) {
             Residuo r = residuoRepo.findById(residuoId).orElseThrow(() -> new RuntimeException("Resíduo não encontrado: id=" + residuoId));
@@ -77,20 +71,20 @@ public class CaminhaoController {
         if (!repo.existsById(id)) throw new RuntimeException("Caminhão não encontrado");
         requestDTO.validarAtributos();
 
-        Caminhao atualizarCaminhao = repo.findById(id).orElseThrow(() -> new RuntimeException("Caminhão não encontrado"));
-        atualizarCaminhao.setPlaca(requestDTO.getPlaca());
-        atualizarCaminhao.setMotorista(requestDTO.getMotorista());
-        atualizarCaminhao.setCapacidade(requestDTO.getCapacidade());
+        Caminhao atualizar = repo.findById(id).orElseThrow(() -> new RuntimeException("Caminhão não encontrado"));
+        atualizar.setPlaca(requestDTO.getPlaca());
+        atualizar.setMotorista(requestDTO.getMotorista());
+        atualizar.setCapacidade(requestDTO.getCapacidade());
 
         List<Residuo> listaResiduo = new ArrayList<>();
         for (Long residuoId : requestDTO.getTiposResiduos()) {
             Residuo r = residuoRepo.findById(residuoId).orElseThrow(() -> new RuntimeException("Resíduo não encontrado: id=" + residuoId));
             listaResiduo.add(r);
         }
-        atualizarCaminhao.setTiposResiduos(listaResiduo);
-        repo.save(atualizarCaminhao);
+        atualizar.setTiposResiduos(listaResiduo);
+        repo.save(atualizar);
 
-        return ResponseEntity.ok(new CaminhaoResponseDTO(atualizarCaminhao));
+        return ResponseEntity.ok(new CaminhaoResponseDTO(atualizar));
     }
 
     @DeleteMapping("/deletar/{id}")

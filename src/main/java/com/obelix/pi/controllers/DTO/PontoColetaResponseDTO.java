@@ -1,9 +1,7 @@
 package com.obelix.pi.controllers.DTO;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import java.util.ArrayList;
+import java.util.List;
 
 import com.obelix.pi.model.PontoColeta;
 import com.obelix.pi.model.Residuo;
@@ -12,6 +10,7 @@ import com.obelix.pi.model.Residuo;
  * DTO de resposta para PontoColeta.
  */
 public class PontoColetaResponseDTO {
+
     private Long id;
     private String nome;
     private String responsavel;
@@ -24,18 +23,18 @@ public class PontoColetaResponseDTO {
 
     public PontoColetaResponseDTO() {}
 
-    public PontoColetaResponseDTO(PontoColeta pontoColeta) {
-        if (pontoColeta == null) return;
-        this.id = pontoColeta.getId();
-        this.nome = pontoColeta.getNome();
-        this.responsavel = pontoColeta.getResponsavel();
-        this.telefoneResponsavel = pontoColeta.getTelefoneResponsavel();
-        this.emailResponsavel = pontoColeta.getEmailResponsavel();
-        this.endereco = pontoColeta.getEndereco();
-        this.horario = pontoColeta.getHorario();
-        this.bairroId = pontoColeta.getBairro() != null ? pontoColeta.getBairro().getId() : null;
-        if (pontoColeta.getTiposResiduos() != null) {
-            for (Residuo r : pontoColeta.getTiposResiduos()) {
+    public PontoColetaResponseDTO(PontoColeta p) {
+        if (p == null) return;
+        this.id = p.getId();
+        this.nome = p.getNome();
+        this.responsavel = p.getResponsavel();
+        this.telefoneResponsavel = p.getTelefoneResponsavel();
+        this.emailResponsavel = p.getEmailResponsavel();
+        this.endereco = p.getEndereco();
+        this.horario = p.getHorario();
+        this.bairroId = p.getBairro() != null ? p.getBairro().getId() : null;
+        if (p.getTiposResiduos() != null) {
+            for (Residuo r : p.getTiposResiduos()) {
                 if (r != null && r.getId() != null) this.tiposResiduos.add(r.getId());
             }
         }

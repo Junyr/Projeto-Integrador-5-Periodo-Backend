@@ -1,13 +1,15 @@
 package com.obelix.pi.controllers.DTO;
 
 /**
- * DTO para atualizar dados do usuário.
+ * DTO para atualização de dados do usuário.
  */
 public class UsuarioDadosRequestDTO {
+
     private String nome;
     private String email;
 
-    // Getters / Setters
+    public UsuarioDadosRequestDTO() {}
+
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
 
