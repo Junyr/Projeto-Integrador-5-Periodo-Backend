@@ -2,23 +2,15 @@ package com.obelix.pi.controllers;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.obelix.pi.model.Residuo;
 import com.obelix.pi.repository.ResiduoRepo;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 /**
- * Controller de resíduos: simples, mas com validação contra duplicidade.
+ * Controller de Resíduo.
  */
 @RestController
 @RequestMapping("/residuo")
@@ -43,11 +35,9 @@ public class ResiduoController {
         if (residuo.getTipo() == null || residuo.getTipo().isBlank()) {
             throw new RuntimeException("Tipo de resíduo não pode ser vazio.");
         }
-        // evitar duplicidade (assume método existsByTipoIgnoreCase ou existsByTipo)
         boolean existe = false;
         try { existe = repo.existsByTipo(residuo.getTipo()); } catch (Exception ignored) {}
         if (existe) throw new RuntimeException("Resíduo já existe: " + residuo.getTipo());
-
         Residuo salvo = repo.save(residuo);
         return ResponseEntity.status(201).body(salvo);
     }

@@ -6,12 +6,15 @@ import com.obelix.pi.repository.BairroRepo;
  * DTO para criação/atualização de Rua.
  */
 public class RuaRequestDTO {
+
     private Long id;
     private Long origemId;
     private Long destinoId;
     private double distanciaKm;
 
-    // Getters/Setters
+    public RuaRequestDTO() {}
+
+    // Getters / Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

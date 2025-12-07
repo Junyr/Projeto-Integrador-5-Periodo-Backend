@@ -3,15 +3,16 @@ package com.obelix.pi.controllers.DTO;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.obelix.pi.model.Rota;
 import com.obelix.pi.model.Bairro;
-import com.obelix.pi.model.Rua;
 import com.obelix.pi.model.Residuo;
+import com.obelix.pi.model.Rota;
+import com.obelix.pi.model.Rua;
 
 /**
  * DTO de resposta para Rota.
  */
 public class RotaResponseDTO {
+
     private Long id;
     private Long caminhaoId;
     private List<Long> bairros = new ArrayList<>();

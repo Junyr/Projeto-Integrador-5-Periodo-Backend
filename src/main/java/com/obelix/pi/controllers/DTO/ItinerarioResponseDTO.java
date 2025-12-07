@@ -5,9 +5,10 @@ import java.time.LocalDate;
 import com.obelix.pi.model.Itinerario;
 
 /**
- * DTO simples de resposta para Itinerário.
+ * DTO de resposta para Itinerário.
  */
 public class ItinerarioResponseDTO {
+
     private Long id;
     private LocalDate data;
     private Long rotaId;
@@ -21,7 +22,7 @@ public class ItinerarioResponseDTO {
         this.rotaId = itinerario.getRota() != null ? itinerario.getRota().getId() : null;
     }
 
-    // Getters/Setters
+    // Getters / Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
