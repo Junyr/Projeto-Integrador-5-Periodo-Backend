@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.obelix.pi.controllers.DTO.UsuarioDadosRequestDTO;
 import com.obelix.pi.controllers.DTO.UsuarioRequestDTO;
+import com.obelix.pi.controllers.DTO.UsuarioResponseDTO;
 import com.obelix.pi.model.Usuario;
 import com.obelix.pi.repository.UsuarioRepo;
 
@@ -27,7 +28,7 @@ public class UsuarioController {
     private UsuarioRepo repo;
 
     @PostMapping("/validar")
-    public ResponseEntity<Boolean> validarUsuario(@RequestBody UsuarioRequestDTO requestDTO) {
+    public ResponseEntity<UsuarioResponseDTO> validarUsuario(@RequestBody UsuarioRequestDTO requestDTO) {
         if (requestDTO.getEmail() == null || requestDTO.getSenha() == null || requestDTO.getEmail().isBlank() || requestDTO.getSenha().isBlank()) {
             throw new RuntimeException("Por favor preencha todos os campos obrigatórios: email e senha.");
         }
@@ -39,12 +40,14 @@ public class UsuarioController {
             throw new RuntimeException("A senha deve ter pelo menos 6 caracteres.");
         }
 
-        if (!repo.existsByEmail(requestDTO.getEmail())) throw new RuntimeException("Usuário não encontrado.");
+        if (!repo.existsByEmail(requestDTO.getEmail())) {
+            throw new RuntimeException("Usuário não encontrado.");
+        }
 
         Usuario usuario = repo.findByEmail(requestDTO.getEmail()).orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
         if (!usuario.validarSenha(requestDTO.getSenha(), usuario.getSenha())) throw new RuntimeException("Senha incorreta.");
 
-        return ResponseEntity.ok(true);
+        return ResponseEntity.ok(new UsuarioResponseDTO(usuario));
     }
 
     @PostMapping("/adicionar")

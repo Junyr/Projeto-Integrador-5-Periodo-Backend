@@ -42,6 +42,12 @@ public class RuaController {
         return ResponseEntity.ok(repo.findAll());
     }
 
+    @GetMapping("/buscar/{id}")
+    public ResponseEntity<Rua> buscar(@PathVariable Long id) {
+        Rua r = repo.findById(id).orElseThrow(() -> new RuntimeException("Rua não encontrada"));
+        return ResponseEntity.ok(r);
+    }
+
     @PostMapping("/adicionar")
     public ResponseEntity<Rua> cadastrar(@RequestBody RuaRequestDTO requestDTO) {
         requestDTO.validarAtributos(bairroRepo);

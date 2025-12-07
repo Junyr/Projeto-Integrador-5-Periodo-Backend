@@ -13,7 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.obelix.pi.controllers.DTO.CaminhaoResponseDTO;
+import com.obelix.pi.controllers.DTO.ItinerarioRequestDTO;
 import com.obelix.pi.controllers.DTO.ItinerarioResponseDTO;
+import com.obelix.pi.model.Bairro;
+import com.obelix.pi.model.Caminhao;
 import com.obelix.pi.model.Itinerario;
 import com.obelix.pi.model.Rota;
 import com.obelix.pi.repository.ItinerarioRepo;
@@ -43,31 +47,39 @@ public class ItinerarioController {
         return ResponseEntity.ok(repo.findAll().stream().map(ItinerarioResponseDTO::new).collect(Collectors.toList()));
     }
 
+    @GetMapping("/buscar/{id}")
+    public ResponseEntity<ItinerarioResponseDTO> buscarCaminhao(@PathVariable Long id) {
+        Itinerario itinerario = repo.findById(id).orElseThrow(() -> new RuntimeException("Itinerario não encontrado"));
+        return ResponseEntity.ok(new ItinerarioResponseDTO(itinerario));
+    }
+
     @PostMapping("/adicionar")
-    public ResponseEntity<ItinerarioResponseDTO> cadastrar(@RequestBody Itinerario itinerario) {
-        if (itinerario == null || itinerario.getRota() == null || itinerario.getRota().getId() == null) {
+    public ResponseEntity<ItinerarioResponseDTO> cadastrar(@RequestBody ItinerarioRequestDTO itinerario) {
+        if (itinerario == null || itinerario.getRotaId() == null || itinerario.getRotaId() == null) {
             throw new RuntimeException("Rota inválida no itinerário.");
         }
-        Rota rota = rotaRepo.findById(itinerario.getRota().getId()).orElseThrow(() -> new RuntimeException("Rota não encontrada"));
+        Rota rota = rotaRepo.findById(itinerario.getRotaId()).orElseThrow(() -> new RuntimeException("Rota não encontrada"));
 
         // verificarDisponibilidade deve retornar true se disponível
         boolean disponivel = service.verificarDisponibilidade(rota.getCaminhao().getId(), itinerario.getData());
         if (!disponivel) throw new RuntimeException("Caminhão não disponível para a data informada");
 
-        itinerario.setRota(rota);
-        repo.save(itinerario);
-        return ResponseEntity.status(201).body(new ItinerarioResponseDTO(itinerario));
+        Itinerario novoItinerario = new Itinerario();
+        novoItinerario.setData(itinerario.getData());
+        novoItinerario.setRota(rota);
+        repo.save(novoItinerario);
+        return ResponseEntity.status(201).body(new ItinerarioResponseDTO(novoItinerario));
     }
 
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<ItinerarioResponseDTO> atualizar(@PathVariable Long id, @RequestBody Itinerario itinerario) {
+    public ResponseEntity<ItinerarioResponseDTO> atualizar(@PathVariable Long id, @RequestBody ItinerarioRequestDTO itinerario) {
         if (!repo.existsById(id)) throw new RuntimeException("Itinerário não encontrado.");
 
-        if (itinerario == null || itinerario.getRota() == null || itinerario.getRota().getId() == null) {
+        if (itinerario == null || itinerario.getRotaId() == null || itinerario.getRotaId() == null) {
             throw new RuntimeException("Rota inválida no itinerário.");
         }
 
-        Rota rota = rotaRepo.findById(itinerario.getRota().getId()).orElseThrow(() -> new RuntimeException("Rota não encontrada"));
+        Rota rota = rotaRepo.findById(itinerario.getRotaId()).orElseThrow(() -> new RuntimeException("Rota não encontrada"));
         boolean disponivel = service.verificarDisponibilidade(rota.getCaminhao().getId(), itinerario.getData());
         if (!disponivel) throw new RuntimeException("Caminhão não disponível para a data informada");
 

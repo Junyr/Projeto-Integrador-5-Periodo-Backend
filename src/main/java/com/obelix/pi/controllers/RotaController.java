@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.obelix.pi.controllers.DTO.RotaRequestDTO;
 import com.obelix.pi.controllers.DTO.RotaResponseDTO;
+import com.obelix.pi.model.Residuo;
 import com.obelix.pi.model.Rota;
 import com.obelix.pi.repository.BairroRepo;
 import com.obelix.pi.repository.CaminhaoRepo;
@@ -49,6 +50,13 @@ public class RotaController {
     @GetMapping("/listar")
     public ResponseEntity<List<RotaResponseDTO>> listar() {
         return ResponseEntity.ok(repo.findAll().stream().map(RotaResponseDTO::new).collect(Collectors.toList()));
+    }
+
+    @GetMapping("/buscar/{id}")
+    public ResponseEntity<RotaResponseDTO> buscar(@PathVariable Long id) {
+        RotaResponseDTO dto = repo.findById(id).map(RotaResponseDTO::new)
+            .orElseThrow(() -> new RuntimeException("Rota não encontrada"));
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping("/adicionar")

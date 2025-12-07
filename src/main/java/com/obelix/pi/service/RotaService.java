@@ -66,6 +66,9 @@ public class RotaService implements IRotaService {
             rota.setBairros(bairrosCaminho);
             rota.setRuas(caminho);
             rota.setTiposResiduos(residuoRepo.findAllById(requestDTO.getTipoResiduoId()));
+            rota.setDistanciaTotal(
+                caminho.stream().mapToDouble(Rua::getDistanciaKm).sum()
+            );
 
             return rota;
         }
