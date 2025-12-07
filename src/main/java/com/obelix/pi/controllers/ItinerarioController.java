@@ -4,8 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.obelix.pi.controllers.DTO.ItinerarioResponseDTO;
-import com.obelix.pi.model.Bairro;
-import com.obelix.pi.model.Caminhao;
+import com.obelix.pi.controllers.DTO.ItinerarioRequestDTO;
 import com.obelix.pi.model.Itinerario;
 import com.obelix.pi.model.Rota;
 import com.obelix.pi.repository.ItinerarioRepo;

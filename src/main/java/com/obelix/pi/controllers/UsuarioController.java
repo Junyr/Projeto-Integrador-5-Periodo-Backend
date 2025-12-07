@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.obelix.pi.controllers.DTO.UsuarioDadosRequestDTO;
 import com.obelix.pi.controllers.DTO.UsuarioRequestDTO;
+import com.obelix.pi.controllers.DTO.UsuarioResponseDTO;
 import com.obelix.pi.model.Usuario;
 import com.obelix.pi.repository.UsuarioRepo;
 

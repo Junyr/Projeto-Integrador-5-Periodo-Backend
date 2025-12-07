@@ -2,7 +2,9 @@ package com.obelix.pi.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.obelix.pi.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,11 +14,6 @@ import com.obelix.pi.model.PontoColeta;
 import com.obelix.pi.model.Residuo;
 import com.obelix.pi.model.Rota;
 import com.obelix.pi.model.Rua;
-import com.obelix.pi.repository.BairroRepo;
-import com.obelix.pi.repository.CaminhaoRepo;
-import com.obelix.pi.repository.PontoColetaRepo;
-import com.obelix.pi.repository.ResiduoRepo;
-import com.obelix.pi.repository.RotaRepo;
 import com.obelix.pi.service.interfaces.IRotaService;
 
 @Service
@@ -39,6 +36,9 @@ public class RotaService implements IRotaService {
 
     @Autowired
     private RotaRepo rotaRepo;
+
+    @Autowired
+    private RuaRepo ruaRepo;
 
     @Autowired
     private BairroRepo bairroRepo;
@@ -87,6 +87,13 @@ public class RotaService implements IRotaService {
 
         for (Rota rota : rotas) {
             try {
+                if (rota.getRuas() != null) {
+                    rota.setRuas(
+                            rota.getRuas().stream()
+                                    .filter(r -> r.getId() != null && ruaRepo.existsById(r.getId()))
+                                    .collect(Collectors.toList())
+                    );
+                }
                 // determinar origem e destino a partir das ruas atuais (fallback para bairros se ruas estiverem vazias)
                 Long origemId = null;
                 Long destinoId = null;

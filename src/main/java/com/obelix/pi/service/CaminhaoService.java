@@ -29,25 +29,25 @@ public class CaminhaoService implements ICaminhaoService {
     public class ValidacaoCompatibilidade implements ValidacaoResiduosStrategy {
         @Override
         public boolean validar(Long caminhaoId, Long pontoColetaId) {
-            if (caminhaoId == null || pontoColetaId == null) {
+            if (caminhaoId == null || pontoColetaId == null)
                 throw new IllegalArgumentException("IDs não podem ser nulos");
-            }
 
-            if (!caminhaoRepo.existsById(caminhaoId) || !pontoColetaRepo.existsById(pontoColetaId)) {
+            if (!caminhaoRepo.existsById(caminhaoId) ||
+                    !pontoColetaRepo.existsById(pontoColetaId))
                 return false;
-            }
 
-            return caminhaoRepo.findById(caminhaoId)
-                    .flatMap(c -> Optional.ofNullable(c.getTiposResiduos()))
-                    .map(caminhaoResiduos -> 
-                        pontoColetaRepo.findById(pontoColetaId)
-                            .map(p -> {
-                                List<Residuo> pr = p.getTiposResiduos();
-                                return caminhaoResiduos.stream().anyMatch(pr::contains);
-                            }).orElse(false)
-                    ).orElse(false);
+            List<Residuo> residuosCaminhao = caminhaoRepo.findById(caminhaoId)
+                    .map(c -> Optional.ofNullable(c.getTiposResiduos()).orElse(List.of()))
+                    .orElse(List.of());
+
+            List<Residuo> residuosPonto = pontoColetaRepo.findById(pontoColetaId)
+                    .map(p -> Optional.ofNullable(p.getTiposResiduos()).orElse(List.of()))
+                    .orElse(List.of());
+
+            return residuosCaminhao.stream().anyMatch(residuosPonto::contains);
         }
     }
+
 
     private final ValidacaoResiduosStrategy strategy = new ValidacaoCompatibilidade();
 

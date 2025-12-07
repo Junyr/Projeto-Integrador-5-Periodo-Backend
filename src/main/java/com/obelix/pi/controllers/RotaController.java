@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import com.obelix.pi.controllers.DTO.RotaRequestDTO;
 import com.obelix.pi.controllers.DTO.RotaResponseDTO;
-import com.obelix.pi.model.Residuo;
 import com.obelix.pi.model.Rota;
 import com.obelix.pi.repository.BairroRepo;
 import com.obelix.pi.repository.CaminhaoRepo;
