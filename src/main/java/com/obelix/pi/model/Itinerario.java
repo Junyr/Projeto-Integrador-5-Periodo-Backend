@@ -1,16 +1,8 @@
 package com.obelix.pi.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.Data;
+import jakarta.persistence.*;
 import java.time.LocalDate;
 
-@Data
 @Entity
 @Table(name = "itinerario")
 public class Itinerario {
@@ -24,5 +16,13 @@ public class Itinerario {
     @ManyToOne
     @JoinColumn(name = "rota_id")
     private Rota rota;
-}
 
+    public Itinerario() {}
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public LocalDate getData() { return data; }
+    public void setData(LocalDate data) { this.data = data; }
+    public Rota getRota() { return rota; }
+    public void setRota(Rota rota) { this.rota = rota; }
+}

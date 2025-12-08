@@ -2,7 +2,9 @@ package com.obelix.pi.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.obelix.pi.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,11 +14,6 @@ import com.obelix.pi.model.PontoColeta;
 import com.obelix.pi.model.Residuo;
 import com.obelix.pi.model.Rota;
 import com.obelix.pi.model.Rua;
-import com.obelix.pi.repository.BairroRepo;
-import com.obelix.pi.repository.CaminhaoRepo;
-import com.obelix.pi.repository.PontoColetaRepo;
-import com.obelix.pi.repository.ResiduoRepo;
-import com.obelix.pi.repository.RotaRepo;
 import com.obelix.pi.service.interfaces.IRotaService;
 
 @Service
@@ -41,79 +38,121 @@ public class RotaService implements IRotaService {
     private RotaRepo rotaRepo;
 
     @Autowired
+    private RuaRepo ruaRepo;
+
+    @Autowired
     private BairroRepo bairroRepo;
 
     @Override
     public Rota gerarRota(RotaRequestDTO requestDTO) {
-        // Valida compatibilidade dos resíduos do caminhão com os pontos de coleta
-        if(caminhaoService.validarCompatibilidadeComResiduos(requestDTO.getCaminhaoId(), requestDTO.getDestinoId()) &&
-           caminhaoService.validarCompatibilidadeComResiduos(requestDTO.getCaminhaoId(), requestDTO.getOrigemId())) {
+        if (requestDTO == null) throw new RuntimeException("Request inválido");
 
-            Rota rota = new Rota();
-            rota.setCaminhao(caminhaoRepo.getReferenceById(requestDTO.getCaminhaoId()));
+        // validações de compatibilidade
+        boolean okOrigem = caminhaoService.validarCompatibilidadeComResiduos(requestDTO.getCaminhaoId(), requestDTO.getOrigemId());
+        boolean okDestino = caminhaoService.validarCompatibilidadeComResiduos(requestDTO.getCaminhaoId(), requestDTO.getDestinoId());
+        if (!(okOrigem && okDestino)) throw new RuntimeException("Tipo de resíduo não compatível com o caminhão.");
 
-            // Pega os bairros de origem e destino
-            PontoColeta pontoColetaOrigem = pontoColetaRepo.getReferenceById(requestDTO.getOrigemId());
-            Bairro bairroOrigem = bairroRepo.getReferenceById(pontoColetaOrigem.getBairro().getId());
+        Rota rota = new Rota();
+        rota.setCaminhao(caminhaoRepo.findById(requestDTO.getCaminhaoId())
+                .orElseThrow(() -> new RuntimeException("Caminhão não encontrado")));
 
-            PontoColeta pontoColetaDestino = pontoColetaRepo.getReferenceById(requestDTO.getDestinoId());
-            Bairro bairroDestino = bairroRepo.getReferenceById(pontoColetaDestino.getBairro().getId());
+        PontoColeta pontoOrigem = pontoColetaRepo.findById(requestDTO.getOrigemId())
+                .orElseThrow(() -> new RuntimeException("Ponto de coleta origem não encontrado"));
+        PontoColeta pontoDestino = pontoColetaRepo.findById(requestDTO.getDestinoId())
+                .orElseThrow(() -> new RuntimeException("Ponto de coleta destino não encontrado"));
 
-            // Calcula o caminho mais curto usando Dijkstra
-            List<Rua> caminho = dijkstraService.encontrarCaminhoMaisCurto(bairroOrigem.getId(), bairroDestino.getId());
-            List<Bairro> bairrosCaminho = extrairBairrosDoCaminho(caminho, bairroOrigem.getId(), bairroDestino.getId());
+        Bairro bairroOrigem = pontoOrigem.getBairro();
+        Bairro bairroDestino = pontoDestino.getBairro();
 
-            rota.setBairros(bairrosCaminho);
-            rota.setRuas(caminho);
-            rota.setTiposResiduos(residuoRepo.findAllById(requestDTO.getTipoResiduoId()));
+        List<Rua> caminho = dijkstraService.encontrarCaminhoMaisCurto(bairroOrigem.getId(), bairroDestino.getId());
+        List<Bairro> bairrosCaminho = extrairBairrosDoCaminho(caminho, bairroOrigem.getId(), bairroDestino.getId());
 
-            return rota;
-        }
+        rota.setBairros(bairrosCaminho);
+        rota.setRuas(caminho);
 
-        throw new RuntimeException("Erro ao gerar rota: Tipo de resíduo não compatível com o caminhão.");
+        // tipos de residuos
+        List<Residuo> tipos = residuoRepo.findAllById(requestDTO.getTipoResiduoId());
+        rota.setTiposResiduos(tipos);
+
+        // calcula distancia total
+        double distanciaTotal = caminho.stream().mapToDouble(Rua::getDistanciaKm).sum();
+        rota.setDistanciaTotal(distanciaTotal);
+
+        return rota;
     }
 
-    
     @Override
     public void atualizarRotas() {
-        /*
         List<Rota> rotas = rotaRepo.findAll();
 
         for (Rota rota : rotas) {
-            // Cria o DTO para gerar rota otimizada
-            RotaRequestDTO requestDTO = new RotaRequestDTO(
-                rota.getRuas().get(0).getOrigem().getId(),
-                rota.getRuas().get(rota.getRuas().size() - 1).getDestino().getId(),
-                rota.getTiposResiduos().stream().map(Residuo::getId).toList(),
-                rota.getCaminhao().getId()
-            );
+            try {
+                if (rota.getRuas() != null) {
+                    rota.setRuas(
+                            rota.getRuas().stream()
+                                    .filter(r -> r.getId() != null && ruaRepo.existsById(r.getId()))
+                                    .collect(Collectors.toList())
+                    );
+                }
+                // determinar origem e destino a partir das ruas atuais (fallback para bairros se ruas estiverem vazias)
+                Long origemId = null;
+                Long destinoId = null;
 
-            Rota rotaOtimizada = gerarRota(requestDTO);
+                if (rota.getRuas() != null && !rota.getRuas().isEmpty()) {
+                    List<Rua> ruas = rota.getRuas();
+                    origemId = ruas.get(0).getOrigem().getId();
+                    destinoId = ruas.get(ruas.size() - 1).getDestino().getId();
+                } else if (rota.getBairros() != null && !rota.getBairros().isEmpty()) {
+                    List<Bairro> bairros = rota.getBairros();
+                    origemId = bairros.get(0).getId();
+                    destinoId = bairros.get(bairros.size() - 1).getId();
+                } else {
+                    // não há dados para recalcular -> pular
+                    continue;
+                }
 
-            rota.setBairros(rotaOtimizada.getBairros());
-            rota.setRuas(rotaOtimizada.getRuas());
-            rota.setDistanciaTotal(rotaOtimizada.getDistanciaTotal());
+                List<Long> tipoResiduoIds = rota.getTiposResiduos() == null ? new ArrayList<>()
+                        : rota.getTiposResiduos().stream().map(Residuo::getId).collect(Collectors.toList());
 
-            rotaRepo.save(rota);
-        }*/
+                if (rota.getCaminhao() == null || rota.getCaminhao().getId() == null) {
+                    // sem caminhão atribuído -> pular
+                    continue;
+                }
+
+                RotaRequestDTO dto = new RotaRequestDTO();
+                dto.setOrigemId(origemId);
+                dto.setDestinoId(destinoId);
+                dto.setTipoResiduoId(tipoResiduoIds);
+                dto.setCaminhaoId(rota.getCaminhao().getId());
+
+                Rota otimizada = gerarRota(dto);
+
+                rota.setBairros(otimizada.getBairros());
+                rota.setRuas(otimizada.getRuas());
+                rota.setTiposResiduos(otimizada.getTiposResiduos());
+                double distanciaTotal = otimizada.getRuas() == null ? 0.0 : otimizada.getRuas().stream().mapToDouble(Rua::getDistanciaKm).sum();
+                rota.setDistanciaTotal(distanciaTotal);
+
+                rotaRepo.save(rota);
+            } catch (Exception e) {
+                // log e continuar (não interrompe atualização em massa)
+                System.err.println("[RotaService] Falha ao atualizar rota id=" + rota.getId() + " : " + e.getMessage());
+            }
+        }
     }
 
     private List<Bairro> extrairBairrosDoCaminho(List<Rua> caminho, Long origemId, Long destinoId) {
         List<Bairro> bairros = new ArrayList<>();
         if (caminho == null || caminho.isEmpty()) {
-            bairros.add(bairroRepo.findById(origemId).orElse(null));
-            bairros.add(bairroRepo.findById(destinoId).orElse(null));
+            bairroRepo.findById(origemId).ifPresent(bairros::add);
+            bairroRepo.findById(destinoId).ifPresent(bairros::add);
             return bairros;
         }
 
-        Bairro atual = bairroRepo.findById(origemId).orElse(null);
-        if (atual != null) bairros.add(atual);
-
+        bairroRepo.findById(origemId).ifPresent(bairros::add);
         for (Rua rua : caminho) {
-            Bairro destinoRua = rua.getDestino();
-            if (destinoRua != null) bairros.add(destinoRua);
+            if (rua.getDestino() != null) bairros.add(rua.getDestino());
         }
-
         return bairros;
     }
 }

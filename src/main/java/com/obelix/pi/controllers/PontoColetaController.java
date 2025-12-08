@@ -3,16 +3,6 @@ package com.obelix.pi.controllers;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.obelix.pi.controllers.DTO.PontoColetaRequestDTO;
 import com.obelix.pi.controllers.DTO.PontoColetaResponseDTO;
 import com.obelix.pi.model.PontoColeta;
@@ -21,10 +11,12 @@ import com.obelix.pi.repository.BairroRepo;
 import com.obelix.pi.repository.PontoColetaRepo;
 import com.obelix.pi.repository.ResiduoRepo;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 /**
- * Controller de pontos de coleta — valida e converte DTOs com segurança.
+ * Controller de pontos de coleta.
  */
 @RestController
 @RequestMapping("/ponto_coleta")
@@ -54,22 +46,21 @@ public class PontoColetaController {
     public ResponseEntity<PontoColetaResponseDTO> cadastrar(@RequestBody PontoColetaRequestDTO requestDTO) {
         requestDTO.validarAtributos(bairroRepo);
 
-        // converte ids de resíduos para entidades
         List<Residuo> residuos = residuoRepo.findAllById(requestDTO.getTiposResiduos());
         if (residuos == null || residuos.isEmpty()) throw new RuntimeException("Tipos de resíduos inválidos");
 
-        PontoColeta pontoColeta = new PontoColeta();
-        pontoColeta.setNome(requestDTO.getNome());
-        pontoColeta.setResponsavel(requestDTO.getResponsavel());
-        pontoColeta.setTelefoneResponsavel(requestDTO.getTelefoneResponsavel());
-        pontoColeta.setEmailResponsavel(requestDTO.getEmailResponsavel());
-        pontoColeta.setEndereco(requestDTO.getEndereco());
-        pontoColeta.setHorario(requestDTO.getHorario());
-        pontoColeta.setBairro(bairroRepo.findById(requestDTO.getBairroId()).orElseThrow(() -> new RuntimeException("Bairro não encontrado")));
-        pontoColeta.setTiposResiduos(residuos);
-        repo.save(pontoColeta);
+        PontoColeta p = new PontoColeta();
+        p.setNome(requestDTO.getNome());
+        p.setResponsavel(requestDTO.getResponsavel());
+        p.setTelefoneResponsavel(requestDTO.getTelefoneResponsavel());
+        p.setEmailResponsavel(requestDTO.getEmailResponsavel());
+        p.setEndereco(requestDTO.getEndereco());
+        p.setHorario(requestDTO.getHorario());
+        p.setBairro(bairroRepo.findById(requestDTO.getBairroId()).orElseThrow(() -> new RuntimeException("Bairro não encontrado")));
+        p.setTiposResiduos(residuos);
+        repo.save(p);
 
-        return ResponseEntity.status(201).body(new PontoColetaResponseDTO(pontoColeta));
+        return ResponseEntity.status(201).body(new PontoColetaResponseDTO(p));
     }
 
     @PutMapping("/atualizar/{id}")
@@ -78,7 +69,6 @@ public class PontoColetaController {
         requestDTO.validarAtributos(bairroRepo);
 
         PontoColeta atualizar = repo.findById(id).orElseThrow(() -> new RuntimeException("Ponto de coleta não encontrado"));
-
         List<Residuo> residuos = residuoRepo.findAllById(requestDTO.getTiposResiduos());
         if (residuos == null || residuos.isEmpty()) throw new RuntimeException("Tipos de resíduos inválidos");
 

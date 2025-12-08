@@ -7,15 +7,18 @@ import com.obelix.pi.repository.CaminhaoRepo;
 import com.obelix.pi.repository.ResiduoRepo;
 
 /**
- * DTO de requisição para gerar/atualizar Rota.
+ * DTO de requisição para Rota.
  */
 public class RotaRequestDTO {
+
     private Long origemId;
     private Long destinoId;
     private List<Long> tipoResiduoId;
     private Long caminhaoId;
 
-    // Getters e Setters
+    public RotaRequestDTO() {}
+
+    // Getters / Setters
     public Long getOrigemId() { return origemId; }
     public void setOrigemId(Long origemId) { this.origemId = origemId; }
 
@@ -29,22 +32,16 @@ public class RotaRequestDTO {
     public void setCaminhaoId(Long caminhaoId) { this.caminhaoId = caminhaoId; }
 
     /**
-     * Valida os atributos do DTO.
+     * Valida os atributos do DTO (usa os repositórios).
      */
     public boolean validarAtributos(BairroRepo bairroRepo, ResiduoRepo residuoRepo, CaminhaoRepo caminhaoRepo) {
         if (origemId == null || destinoId == null || caminhaoId == null || tipoResiduoId == null || tipoResiduoId.isEmpty()) {
             throw new RuntimeException("Dados incompletos da rota.");
         }
-        if (!bairroRepo.existsById(origemId)) {
-            throw new RuntimeException("Ponto de coleta origem não encontrado.");
-        }
-        if (!bairroRepo.existsById(destinoId)) {
-            throw new RuntimeException("Ponto de coleta destino não encontrado.");
-        }
-        if (!caminhaoRepo.existsById(caminhaoId)) {
-            throw new RuntimeException("Caminhão não encontrado.");
-        }
-        // opcional: verificar se cada residuo existe
+        if (!bairroRepo.existsById(origemId)) throw new RuntimeException("Ponto de coleta origem não encontrado.");
+        if (!bairroRepo.existsById(destinoId)) throw new RuntimeException("Ponto de coleta destino não encontrado.");
+        if (!caminhaoRepo.existsById(caminhaoId)) throw new RuntimeException("Caminhão não encontrado.");
+        // verificar cada residuo
         for (Long id : tipoResiduoId) {
             if (id == null) throw new RuntimeException("ID de resíduo inválido.");
             if (!residuoRepo.existsById(id)) throw new RuntimeException("Resíduo não encontrado: id=" + id);

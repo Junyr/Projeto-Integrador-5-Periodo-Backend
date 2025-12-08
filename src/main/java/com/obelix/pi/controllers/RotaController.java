@@ -3,16 +3,6 @@ package com.obelix.pi.controllers;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.obelix.pi.controllers.DTO.RotaRequestDTO;
 import com.obelix.pi.controllers.DTO.RotaResponseDTO;
 import com.obelix.pi.model.Rota;
@@ -22,10 +12,12 @@ import com.obelix.pi.repository.ResiduoRepo;
 import com.obelix.pi.repository.RotaRepo;
 import com.obelix.pi.service.RotaService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 /**
- * Controller de Rota; delega geração de rota para o RotaService (que você já tem).
+ * Controller de Rota.
  */
 @RestController
 @RequestMapping("/rota")
@@ -49,6 +41,13 @@ public class RotaController {
     @GetMapping("/listar")
     public ResponseEntity<List<RotaResponseDTO>> listar() {
         return ResponseEntity.ok(repo.findAll().stream().map(RotaResponseDTO::new).collect(Collectors.toList()));
+    }
+
+    @GetMapping("/buscar/{id}")
+    public ResponseEntity<RotaResponseDTO> buscar(@PathVariable Long id) {
+        RotaResponseDTO dto = repo.findById(id).map(RotaResponseDTO::new)
+            .orElseThrow(() -> new RuntimeException("Rota não encontrada"));
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping("/adicionar")

@@ -7,9 +7,10 @@ import com.obelix.pi.repository.BairroRepo;
 
 /**
  * DTO de requisição para Ponto de Coleta.
- * Mantive o método validarAtributos(bairroRepo) semelhante ao seu original.
+ * Sem Lombok; getters/setters manuais.
  */
 public class PontoColetaRequestDTO {
+
     private String nome;
     private String responsavel;
     private String telefoneResponsavel;
@@ -19,7 +20,9 @@ public class PontoColetaRequestDTO {
     private Long bairroId;
     private List<Long> tiposResiduos = new ArrayList<>();
 
-    // Getters e setters
+    public PontoColetaRequestDTO() {}
+
+    // Getters / Setters
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
 
@@ -47,23 +50,21 @@ public class PontoColetaRequestDTO {
     }
 
     /**
-     * Valida campos do DTO; usa bairroRepo para garantir que o bairro informado exista.
+     * Validação dos campos com uso do bairroRepo para garantir existência do bairro.
      */
     public boolean validarAtributos(BairroRepo bairroRepo) {
-        if (this.nome == null || this.responsavel == null || this.telefoneResponsavel == null
-                || this.emailResponsavel == null || this.endereco == null || this.horario == null
-                || this.bairroId == null || this.tiposResiduos == null) {
+        if (this.nome == null || this.responsavel == null || this.telefoneResponsavel == null ||
+            this.emailResponsavel == null || this.endereco == null || this.horario == null ||
+            this.bairroId == null || this.tiposResiduos == null) {
             throw new RuntimeException("Por favor preencha todos os campos.");
         }
-        if (this.nome.isEmpty() || this.responsavel.isEmpty() || this.telefoneResponsavel.isEmpty()
-                || this.emailResponsavel.isEmpty() || this.endereco.isEmpty() || this.horario.isEmpty()
-                || this.tiposResiduos.isEmpty()) {
+        if (this.nome.isBlank() || this.responsavel.isBlank() || this.telefoneResponsavel.isBlank() ||
+            this.emailResponsavel.isBlank() || this.endereco.isBlank() || this.horario.isBlank() ||
+            this.tiposResiduos.isEmpty()) {
             throw new RuntimeException("Por favor preencha todos os campos.");
         }
-
-        // validações de formato
         if (!this.nome.matches("^[a-zA-Zà-úÀ-Úâ-ûÂ-ÛçÇ0-9]+(\\s[a-zA-Zà-úÀ-Úâ-ûÂ-ÛçÇ0-9]+)*$")) {
-            throw new RuntimeException("Forneça um nome válido para o ponto de coleta.");
+            throw new RuntimeException("Forneça um nome válido, apenas letras, números e espaços são permitidos.");
         }
         if (!this.responsavel.matches("^[a-zA-Zà-úÀ-Úâ-ûÂ-ÛçÇ]+(\\s[a-zA-Zà-úÀ-Úâ-ûÂ-ÛçÇ]+)*$")) {
             throw new RuntimeException("Forneça um nome válido para o responsável, apenas letras e espaços são permitidos.");

@@ -9,5 +9,6 @@ import com.obelix.pi.model.Itinerario;
 
 @RepositoryRestResource
 public interface ItinerarioRepo extends JpaRepository<Itinerario, Long> {
+
     boolean existsByDataAndRota_Caminhao_Id(LocalDate data, Long caminhaoId);
 }

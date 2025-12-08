@@ -1,11 +1,6 @@
 package com.obelix.pi.service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,12 +11,7 @@ import com.obelix.pi.repository.BairroRepo;
 import com.obelix.pi.repository.RuaRepo;
 
 @Service
-// Padrão Singleton: Garante apenas uma instância do serviço
 public class DijkstraService {
-    
-    private static DijkstraService instance;
-
-    private DijkstraService() {}
 
     @Autowired
     private RuaRepo ruaRepo;
@@ -29,57 +19,64 @@ public class DijkstraService {
     @Autowired
     private BairroRepo bairroRepo;
 
-    public static DijkstraService getInstance() {
-        if(instance == null) {
-            instance = new DijkstraService();
-        }
-        return instance;
-    }
-
-    // Padrão Template Method: Estrutura do algoritmo de Dijkstra
+    /**
+     * Implementação do algoritmo para encontrar caminho entre bairros.
+     * Retorna lista de ruas que compõem o caminho.
+     */
     public List<Rua> encontrarCaminhoMaisCurto(Long origemId, Long destinoId) {
+        if (origemId == null || destinoId == null) throw new IllegalArgumentException("IDs não podem ser nulos");
+
         Bairro origem = bairroRepo.findById(origemId).orElse(null);
         Bairro destino = bairroRepo.findById(destinoId).orElse(null);
-        if (origem != null || destino != null) {
-            List<Rua> ruas = ruaRepo.findAll();
-            Map<Long, Double> distancias = new HashMap<>();
-            Map<Long, Long> predecessores = new HashMap<>();
-            PriorityQueue<Bairro> fila = new PriorityQueue<>(Comparator.comparingDouble(b -> distancias.getOrDefault(b.getId(), Double.MAX_VALUE)));
+        if (origem == null || destino == null) throw new RuntimeException("Bairro origem/destino não encontrado");
 
-            distancias.put(origemId, 0.0);
-            fila.add(origem);
-
-            while (!fila.isEmpty()) {
-                Bairro atual = fila.poll();
-                if (atual.getId().equals(destinoId)) break;
-
-                for (Rua rua : ruas) {
-                    if (rua.getOrigem().equals(atual)) {
-                        Bairro vizinho = rua.getDestino();
-                        double novaDistancia = distancias.get(atual.getId()) + rua.getDistanciaKm();
-                        if (novaDistancia < distancias.getOrDefault(vizinho.getId(), Double.MAX_VALUE)) {
-                            distancias.put(vizinho.getId(), novaDistancia);
-                            predecessores.put(vizinho.getId(), atual.getId());
-                            fila.add(vizinho);
-                        }
-                    }
-                }
-            }
-            List<Rua> caminho = new ArrayList<>();
-            Long atualId = destinoId;
-            while (atualId != null && !atualId.equals(origemId)) {
-                Long predecessorId = predecessores.get(atualId);
-                if (predecessorId != null) {
-                    List<Rua> ruasEntre = ruaRepo.findByOrigemAndDestino(predecessorId, atualId);
-                    Rua menorRua = ruasEntre.stream().min(Comparator.comparingDouble(Rua::getDistanciaKm)).orElse(null);
-                    if (menorRua != null) caminho.add(0, menorRua);
-                }
-                atualId = predecessorId;
-            }
-
-            if (atualId != null && atualId.equals(origemId)) return caminho;
+        List<Rua> ruas = ruaRepo.findAll();
+        // construir grafo simples
+        Map<Long, List<Rua>> adj = new HashMap<>();
+        for (Rua r : ruas) {
+            if (r.getOrigem() == null || r.getDestino() == null) continue;
+            adj.computeIfAbsent(r.getOrigem().getId(), k -> new ArrayList<>()).add(r);
         }
 
-        throw new RuntimeException("Caminho não encontrado entre os bairros especificados.");
+        Map<Long, Double> dist = new HashMap<>();
+        Map<Long, Rua> prevRua = new HashMap<>();
+        Set<Long> visited = new HashSet<>();
+        PriorityQueue<Long> pq = new PriorityQueue<>(Comparator.comparingDouble(dist::get));
+
+        dist.put(origemId, 0.0);
+        pq.add(origemId);
+
+        while (!pq.isEmpty()) {
+            Long currentId = pq.poll();
+            if (!visited.add(currentId)) continue;
+            if (currentId.equals(destinoId)) break;
+
+            List<Rua> adjRuas = adj.getOrDefault(currentId, Collections.emptyList());
+            double curDist = dist.getOrDefault(currentId, Double.MAX_VALUE);
+
+            for (Rua r : adjRuas) {
+                Long neighborId = r.getDestino().getId();
+                double nd = curDist + r.getDistanciaKm();
+                if (nd < dist.getOrDefault(neighborId, Double.MAX_VALUE)) {
+                    dist.put(neighborId, nd);
+                    prevRua.put(neighborId, r);
+                    pq.remove(neighborId); // atualizar prioridade
+                    pq.add(neighborId);
+                }
+            }
+        }
+
+        if (!dist.containsKey(destinoId)) throw new RuntimeException("Caminho não encontrado entre os bairros especificados.");
+
+        // reconstruir caminho de ruas
+        LinkedList<Rua> caminho = new LinkedList<>();
+        Long cur = destinoId;
+        while (!cur.equals(origemId)) {
+            Rua r = prevRua.get(cur);
+            if (r == null) break;
+            caminho.addFirst(r);
+            cur = r.getOrigem().getId();
+        }
+        return caminho;
     }
 }

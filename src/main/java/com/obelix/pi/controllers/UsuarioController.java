@@ -2,23 +2,18 @@ package com.obelix.pi.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.obelix.pi.controllers.DTO.UsuarioDadosRequestDTO;
 import com.obelix.pi.controllers.DTO.UsuarioRequestDTO;
+import com.obelix.pi.controllers.DTO.UsuarioResponseDTO;
 import com.obelix.pi.model.Usuario;
 import com.obelix.pi.repository.UsuarioRepo;
 
 /**
  * Controller de usuário — mantém lógica original porém usando findById e respostas claras.
  * Recomendo futuramente trocar validação/senha para Spring Security/PasswordEncoder.
- */
+ *  */
 @RestController
 @RequestMapping("/usuario")
 public class UsuarioController {
@@ -27,7 +22,7 @@ public class UsuarioController {
     private UsuarioRepo repo;
 
     @PostMapping("/validar")
-    public ResponseEntity<Boolean> validarUsuario(@RequestBody UsuarioRequestDTO requestDTO) {
+    public ResponseEntity<UsuarioResponseDTO> validarUsuario(@RequestBody UsuarioRequestDTO requestDTO) {
         if (requestDTO.getEmail() == null || requestDTO.getSenha() == null || requestDTO.getEmail().isBlank() || requestDTO.getSenha().isBlank()) {
             throw new RuntimeException("Por favor preencha todos os campos obrigatórios: email e senha.");
         }
@@ -44,13 +39,13 @@ public class UsuarioController {
         Usuario usuario = repo.findByEmail(requestDTO.getEmail()).orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
         if (!usuario.validarSenha(requestDTO.getSenha(), usuario.getSenha())) throw new RuntimeException("Senha incorreta.");
 
-        return ResponseEntity.ok(true);
+        return ResponseEntity.ok(new UsuarioResponseDTO(usuario));
     }
 
     @PostMapping("/adicionar")
     public ResponseEntity<Void> cadastrar(@RequestBody Usuario usuario) {
-        if (usuario.getNome() == null || usuario.getEmail() == null || usuario.getSenha() == null
-                || usuario.getNome().isBlank() || usuario.getEmail().isBlank() || usuario.getSenha().isBlank()) {
+        if (usuario.getNome() == null || usuario.getEmail() == null || usuario.getSenha() == null ||
+            usuario.getNome().isBlank() || usuario.getEmail().isBlank() || usuario.getSenha().isBlank()) {
             throw new RuntimeException("Por favor preencha todos os campos obrigatórios: nome, email e senha.");
         }
         if (!usuario.getNome().matches("^[a-zA-Zà-úÀ-Úâ-ûÂ-ÛçÇ]+(\\s[a-zA-Zà-úÀ-Úâ-ûÂ-ÛçÇ]+)*$")) {
@@ -68,7 +63,8 @@ public class UsuarioController {
 
     @PutMapping("/atualizar/dados/{id}")
     public ResponseEntity<Void> atualizarDados(@PathVariable Long id, @RequestBody UsuarioDadosRequestDTO requestDTO) {
-        if (requestDTO.getNome() == null || requestDTO.getEmail() == null || requestDTO.getNome().isBlank() || requestDTO.getEmail().isBlank()) {
+        if (requestDTO.getNome() == null || requestDTO.getEmail() == null ||
+            requestDTO.getNome().isBlank() || requestDTO.getEmail().isBlank()) {
             throw new RuntimeException("Por favor preencha todos os campos obrigatórios: nome, email.");
         }
         if (!repo.existsById(id)) throw new RuntimeException("Usuário não encontrado.");

@@ -11,6 +11,10 @@ import com.obelix.pi.model.Rua;
 
 @RepositoryRestResource
 public interface RuaRepo extends JpaRepository<Rua, Long> {
-    @Query("select r from Rua r where r.origem.id = :origemId and r.destino.id = :destinoId")
-    List<Rua> findByOrigemAndDestino(@Param("origemId") Long bairroOrigemId, @Param("destinoId") Long bairroDestinoId);
+
+    @Query("SELECT r FROM Rua r WHERE r.origem.id = :origemId AND r.destino.id = :destinoId")
+    List<Rua> findByOrigemAndDestino(@Param("origemId") Long origemId,
+                                     @Param("destinoId") Long destinoId);
+
+    boolean existsByOrigem_IdAndDestino_Id(Long origemId, Long destinoId);
 }
