@@ -1,7 +1,7 @@
 package com.obelix.pi.query;
 
 import org.springframework.data.jpa.domain.Specification;
-import javax.persistence.criteria.*;
+import jakarta.persistence.criteria.*;
 import java.util.*;
 
 public class EspecificacaoConsulta<T> {

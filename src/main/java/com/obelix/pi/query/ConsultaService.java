@@ -9,7 +9,7 @@ public class ConsultaService {
     public boolean validarComando(String comando) {
         try {
             AnalisadorLexico lex = new AnalisadorLexico(comando);
-            List<Token> tokens = lex.analisar();
+            List<Token> tokens = lex.tokenizar();
 
             AnalisadorSintatico sintatico = new AnalisadorSintatico(tokens);
             sintatico.analisar();
